@@ -1,24 +1,31 @@
 <template>
 	<view>
-		<image class="logo" src="/static/logo.png"></image>
-		<text class="title">{{title}}</text>
+		<image class="logo" src="/static/logo.png" @click="changelanguage"></image>
+		<text class="title">{{i18n.t('title')}}</text>
 	</view>
 </template>
 
-<script>
-	export default {
-		data() {
-			return {
-				title: 'Hello'
-			}
-		},
-		onLoad() {
+<script lang="uts" setup>
+	
+	import {xStore} from "@/uni_modules/tmx-ui/index.uts"
+	const i18n = xStore.xConfig.i18n 
+	xStore.setDarkModel('dark')
 
-		},
-		methods: {
-
-		}
+	console.log(i18n.getLocale())
+	console.log(i18n.t('tmui4x.cancel'))
+	function changelanguage(){
+			i18n.setLocale('en')
+			console.log(i18n.getLocale())
+			console.log(i18n.t('tmui4x.cancel'))
 	}
+		function localChange(ids:string[]){
+			let id:string = ids[0];
+			xStore.xConfig.language = id;
+			xStore.xConfig.i18n!.setLocale(id)
+			console.log(i18n.getLocale())
+			console.log(i18n.t('tmui4x.cancel'))
+			uni.setStorageSync("language",id)
+		}
 </script>
 
 <style>
