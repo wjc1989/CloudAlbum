@@ -2,79 +2,165 @@
 	<!-- #ifdef APP -->
 	<scroll-view style="flex:1">
 	<!-- #endif -->
- 
-		 
-		<view class="px-8" >
-			<x-waterfall  :list-count="list.length" :column="3">
+		<view class="px-8">
+			<x-waterfall :list-count="list.length" :column="3">
 				<x-waterfall-item v-for="(item,index) in list" :order="index" :key="index">
 					<template v-slot:default="col">
-						<view class="pa-1" :style="{borderRadius:'6px',backgroundColor:bgColorOfView}">
-							<image style="width:100%;height:120px":src="`https://store.tmui.design/api_v2/public/random_picture?random=18${index}`"></image>
- 						</view>
+						<view class="pa-1" :style="{ borderRadius:'6px', backgroundColor:bgColorOfView }">
+							<image @click="viewImage(makeUrl(index))" style="width:100%;height:120px"
+								:src="makeUrl(index)"></image>
+						</view>
 					</template>
 				</x-waterfall-item>
 			</x-waterfall>
 		</view>
+
 	<!-- #ifdef APP -->
 	</scroll-view>
 	<!-- #endif -->
+   <!-- ✅ 遮罩放在页面最后一个节点，盖住全屏 -->
+    <view v-if="saving" class="saving-mask" @touchmove.stop.prevent>
+      <view class="saving-box">
+        <text class="saving-text">Saving...</text>
+      </view>
+    </view>
 </template>
 
-<script>
-	import { xStore, xDate } from "@/uni_modules/tmx-ui/index.uts"
+<script lang="uts">
+	import { xStore } from "@/uni_modules/tmx-ui/index.uts"
+
 	export default {
 		data() {
 			return {
-				strs: '今年4月15日是第九个全民国家安全教育日。《环球时报》记者观察发现，今年“4·15”前后，国更加隐蔽。除国家安全传统领域外，关乎国计国家安全问题专家在接受《环球时报》记者采访时表示，反间也是广大人民群众的义务。',
 				list: [] as string[],
-				loading: false
-			};
+				loading: false,
+				 saving: false            // ✅ 新增
+			}
 		},
-		onLoad() {
-			this.randomData();
-		},
-		onReachBottom() {
-			if (this.loading) return;
-			this.onloadata();
-		},
-		onPullDownRefresh() {
-			this.list = [] as string[]
-			this.$forceUpdate()
-			this.onloadata();
-		},
-		computed:{
+		onLoad() {      this.saving = true ;   this.randomData() },
+		onReachBottom() { if (this.loading) return; this.onloadata() },
+		onPullDownRefresh() { this.list = [] as string[]; this.onloadata() },
+		computed: {
 			bgColorOfView() : string {
-				return xStore.xConfig.dark == 'dark'?xStore.xConfig.sheetDarkColor:'white'
+				return xStore.xConfig.dark == 'dark' ? xStore.xConfig.sheetDarkColor : 'white'
 			},
 			textColorOfView() : string {
-				return xStore.xConfig.dark == 'dark'?'white':'#333333'
-			},
+				return xStore.xConfig.dark == 'dark' ? 'white' : '#333333'
+			}
 		},
 		methods: {
-			randomData() {
-
-				let total = this.list.length;
-				for (let i = 0; i < 18; i++) {
-					let start = Math.max(0, Math.min(Math.random() * this.strs.length, this.strs.length))
-					this.list.push((total + i).toString() + this.strs.substring(start))
-				}
+			makeUrl(index : number) : string {
+				return `https://store.tmui.design/api_v2/public/random_picture?random=18${index}`
 			},
+
+			viewImage(url : string) {
+				const actions = ({
+					itemList: ['Set as Lock Screen', 'Save to Album'],
+					success: (res : LongPressActionsSuccessResult) => {
+						const tap = res.tapIndex
+						if (tap === 0) this.handleSetLockScreen(url)
+						else if (tap === 1) this.handleSaveToAlbum(url)
+					}
+				} as LongPressActionsOptions)
+
+				uni.previewImage({
+					urls: [url],
+					longPressActions: actions
+				})
+			},
+
+			// “设为锁屏”仅做引导（不走原生）
+			handleSetLockScreen(url : string) {
+				uni.showModal({
+					title: 'Not Supported',
+					content: 'Direct setting is not available. Please save the photo to your album and set it as the lock screen in system settings.',
+					showCancel: false
+				})
+			},
+
+			// 下载 -> 存相册（UTSJSONObject 取值）
+			handleSaveToAlbum(url: string) {
+			      this.saving = true       // ✅ 开遮罩
+			      uni.downloadFile({
+			        url,
+			        success: (res: DownloadFileSuccess) => {
+			          if (res.statusCode !== 200) {
+			            this.saving = false
+			            uni.showModal({ title: 'Failed', content: 'HTTP ' + res.statusCode, showCancel: false })
+			            return
+			          }
+			          const temp = res.tempFilePath
+			          if (temp == null || temp.length === 0) {
+			            this.saving = false
+			            uni.showModal({ title: 'Failed', content: 'tempFilePath is empty', showCancel: false })
+			            return
+			          }
+			          uni.saveImageToPhotosAlbum({
+			            filePath: temp,
+			            success: () => {
+			              this.saving = false
+			              uni.showToast({ title: 'Saved to Photos', icon: 'success' })
+			            },
+			            fail: (err) => {
+			              this.saving = false
+			              uni.showModal({ title: 'Failed', content: '' + err, showCancel: false })
+			            }
+			          })
+			        },
+			        fail: (e) => {
+			          this.saving = false
+			          uni.showModal({ title: 'Failed', content: '' + e, showCancel: false })
+			        }
+			      })
+			    },
+
+			randomData() {
+				const total = this.list.length
+				for (let i = 0; i < 18; i++) this.list.push((total + i).toString())
+			},
+
 			onloadata() {
-				let _this = this;
-				uni.showLoading({ title: '...', mask: true })
-				_this.loading = true;
-				setTimeout(function () {
-					_this.randomData();
-					_this.loading = false;
+				console.log("onloadata")
+				this.loading = true
+				uni.showLoading({ title: 'Loading...', mask: true })
+				setTimeout(() => {
+					console.log("hideloading")
+					this.randomData()
+					this.loading = false
 					uni.hideLoading()
 					uni.stopPullDownRefresh()
-				}, 1000);
-
+				}, 800)
 			}
 		}
 	}
 </script>
-
 <style lang="scss">
+.page-root{
+  flex: 1;
+  position: relative; /* ✅ 让绝对定位相对它铺满 */
+}
 
+.saving-mask{
+  position: absolute; /* ✅ uvue 用 absolute 更稳 */
+  left: 0; top: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  /* #ifdef APP-ANDROID */
+  elevation: 99;      /* ✅ 提升原生层级，防止被原生视图盖住 */
+  /* #endif */
+}
+
+.saving-box{
+  padding: 16px 20px;
+  background-color: rgba(20,20,20,0.9);
+  border-radius: 12px;
+}
+
+.saving-text{
+  color: #fff;
+  font-size: 16px;
+}
 </style>
