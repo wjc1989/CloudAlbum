@@ -1,43 +1,80 @@
 <template>
-	<view>
-		<image class="logo" src="/static/logo.png" @click="changelanguage"></image>
-		<text class="title">{{i18n.t('title')}}</text>
-	</view>
+	<!-- #ifdef APP -->
+	<scroll-view style="flex:1">
+	<!-- #endif -->
+ 
+		 
+		<view class="px-8" >
+			<x-waterfall  :list-count="list.length" :column="3">
+				<x-waterfall-item v-for="(item,index) in list" :order="index" :key="index">
+					<template v-slot:default="col">
+						<view class="pa-1" :style="{borderRadius:'6px',backgroundColor:bgColorOfView}">
+							<image style="width:100%;height:120px":src="`https://store.tmui.design/api_v2/public/random_picture?random=18${index}`"></image>
+ 						</view>
+					</template>
+				</x-waterfall-item>
+			</x-waterfall>
+		</view>
+	<!-- #ifdef APP -->
+	</scroll-view>
+	<!-- #endif -->
 </template>
 
-<script lang="uts" setup>
-	
-	import {xStore} from "@/uni_modules/tmx-ui/index.uts"
-	const i18n = xStore.xConfig.i18n 
-	xStore.setDarkModel('dark')
+<script>
+	import { xStore, xDate } from "@/uni_modules/tmx-ui/index.uts"
+	export default {
+		data() {
+			return {
+				strs: '今年4月15日是第九个全民国家安全教育日。《环球时报》记者观察发现，今年“4·15”前后，国更加隐蔽。除国家安全传统领域外，关乎国计国家安全问题专家在接受《环球时报》记者采访时表示，反间也是广大人民群众的义务。',
+				list: [] as string[],
+				loading: false
+			};
+		},
+		onLoad() {
+			this.randomData();
+		},
+		onReachBottom() {
+			if (this.loading) return;
+			this.onloadata();
+		},
+		onPullDownRefresh() {
+			this.list = [] as string[]
+			this.$forceUpdate()
+			this.onloadata();
+		},
+		computed:{
+			bgColorOfView() : string {
+				return xStore.xConfig.dark == 'dark'?xStore.xConfig.sheetDarkColor:'white'
+			},
+			textColorOfView() : string {
+				return xStore.xConfig.dark == 'dark'?'white':'#333333'
+			},
+		},
+		methods: {
+			randomData() {
 
-	console.log(i18n.getLocale())
-	console.log(i18n.t('tmui4x.cancel'))
-	function changelanguage(){
-			i18n.setLocale('en')
-			console.log(i18n.getLocale())
-			console.log(i18n.t('tmui4x.cancel'))
-	}
-		function localChange(ids:string[]){
-			let id:string = ids[0];
-			xStore.xConfig.language = id;
-			xStore.xConfig.i18n!.setLocale(id)
-			console.log(i18n.getLocale())
-			console.log(i18n.t('tmui4x.cancel'))
-			uni.setStorageSync("language",id)
+				let total = this.list.length;
+				for (let i = 0; i < 18; i++) {
+					let start = Math.max(0, Math.min(Math.random() * this.strs.length, this.strs.length))
+					this.list.push((total + i).toString() + this.strs.substring(start))
+				}
+			},
+			onloadata() {
+				let _this = this;
+				uni.showLoading({ title: '...', mask: true })
+				_this.loading = true;
+				setTimeout(function () {
+					_this.randomData();
+					_this.loading = false;
+					uni.hideLoading()
+					uni.stopPullDownRefresh()
+				}, 1000);
+
+			}
 		}
+	}
 </script>
 
-<style>
-	.logo {
-		height: 100px;
-		width: 100px;
-		margin: 100px auto 25px auto;
-	}
+<style lang="scss">
 
-	.title {
-		font-size: 18px;
-		color: #8f8f94;
-    text-align: center;
-	}
 </style>
