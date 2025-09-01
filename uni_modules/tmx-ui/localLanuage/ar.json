@@ -1,0 +1,179 @@
+{
+	"tmui4x": {
+		"cancel": "إلغاء",
+		"confirm": "تأكيد",
+		"success": "نجاح",
+		"fail": "فشل",
+		"warn": "تحذير",
+		"info": "معلومة",
+		"clear":"مسح",
+		"pickerTitle":"الرجاء الاختيار",
+		"calendar":{
+			"year": "سنة",
+			"month": "شهر",
+			"day": "يوم",
+			"hour": "ساعة",
+			"minute": "دقيقة",
+			"second": "ثانية",
+			"titleCurrentMonth":"{0} {1}",
+			"monthCountSelected":"{count} أشهر",
+			"selectedStatus":"{count} أيام محددة | لم يتم اختيار تاريخ | تم الاختيار | تاريخ الانتهاء غير محدد",
+			"rangStatus":"البداية | النهاية | اليوم",
+			"tips":"الحد الأقصى {count} أيام",
+			"currentMonthTitle":"هذا الشهر",
+			"week":"الاثنين | الثلاثاء | الأربعاء | الخميس | الجمعة | السبت | الأحد"
+		},
+		"betweentTime": {
+			"start": "وقت البداية",
+			"end": "وقت النهاية",
+			"quiakListTitle":"اليوم | هذا الأسبوع | هذا الشهر | هذه السنة | هذا الربع",
+			"quiakListTitle2":"آخر {count} أيام",
+			"quiakListTitle3":"السنوات السابقة {count}",
+			"title":"الرجاء اختيار الوقت",
+			"splite":"إلى"
+		},
+		"uploadFile":{
+			"title":"اختر ملف",
+			"uploadStatus":"في انتظار التحميل | جاري التحميل... | فشل التحميل | تم التحميل بنجاح | الحجم يتجاوز الحد",
+			"tips1":"ممنوع الحذف أثناء التحميل",
+			"tips2":"ممنوع الحذف بعد التحميل"
+		},
+		"pickerSelected":{
+			"placeholder":"الرجاء إدخال كلمات البحث",
+			"search":"بحث",
+			"selected":"{count} عناصر محددة",
+			"claer":"مسح التحديد",
+			"selectedMode":"الوضع الحالي: اختيار فردي",
+			"selectedALl":"تحديد الكل"
+		},
+		"tree":{
+			"changeTitle":"تعديل المحتوى",
+			"addTitle":"إضافة تابع",
+			"inputTitle":"العنوان",
+			"inputId":"معرف",
+			"inputTips1":"لا تكرر، يتم توليده تلقائياً عند تركه فارغاً"
+		},
+		"input":{
+			"placeholder":"الرجاء الاختيار أو الإدخال"
+		},
+		"inputTag":{
+			"placeholder": "أدخل واضغط إدخال",
+			"tips": "لا يمكن أن يكون فارغاً",
+			"tips2": "تجاوز الحد الأقصى: {count}",
+			"btnText": "إضافة وسم"
+		},
+		"keyboard":{
+			"placeholder":"لوحة مفاتيح آمنة للإدخال",
+			"space":"مسافة",
+			"confirm":"تأكيد"
+		},
+		"pickerTime":{
+			"hour":"ساعة",
+			"minute":"دقيقة",
+			"second":"ثانية"
+		},
+		"cascader":{
+			"placeholder":"الرجاء الاختيار",
+			"currentPlaceholder":"اختر الحالي"
+		},
+		"pickerDate":{
+			"placeholder":"الرجاء اختيار الوقت",
+			"year":"سنة",
+			"month":"شهر",
+			"day":"يوم",
+			"hour":"ساعة",
+			"minute":"دقيقة",
+			"second":"ثانية"
+		},
+		"uploadMedia":{
+			"tips1":"لا يمكن السحب للفرز أثناء التحميل",
+			"videoPreview":"معاينة الفيديو",
+			"close":"إغلاق",
+			"systemError":"خطأ في النظام",
+			"limitMaxCount":"تجاوز الحد الأقصى للتحميل",
+			"uploadStatus":"في انتظار التحميل | جاري التحميل... | فشل التحميل | تم التحميل بنجاح | الحجم يتجاوز الحد"
+		},
+		"checkbox":{
+			"tips":"تجاوز الحد الأقصى للتحديد"
+		},
+		"weekbar":{
+			"week":"الاثنين | الثلاثاء | الأربعاء | الخميس | الجمعة | السبت | الأحد"
+		},
+		"pagination":{
+			"prev": "السابق",
+			"next": "التالي"
+		},
+		"search":{
+			"placeholder":"أدخل كلمات البحث",
+			"cancel":"إلغاء"
+		},
+		"xmore":{
+			"off": "عرض المزيد",
+			"on": "إخفاء المزيد"
+		},
+		"empty":{
+			"moreLabel": "لا توجد بيانات إضافية",
+			"errorLabel": "خطأ~",
+			"btnLabel": "إعادة المحاولة",
+			"title":"لا توجد بيانات"
+		},
+		"xloading":{
+			"label":"جاري التحميل..."
+		},
+		"actionModal":{
+			"title":"تذكير",
+			"btnText":"تأكيد"
+		},
+		"actionMenu":{
+			"title":"الرجاء الاختيار",
+			"btnText":"تأكيد"
+		},
+		"pullRefresh":{
+			"status_1":"جاري التحديث",
+			"status_2":"اسحب للأسفل للمزيد",
+			"status_3":"إفلات للتحديث",
+			"status_4":"تم التحديث",
+			"status_5":"فشل التحديث"
+		},
+		"virtualList":{
+			"status_0":"اسحب للأسفل للمزيد",
+			"status_1":"إفلات للتحديث",
+			"status_2":"جاري التحديث",
+			"status_3":"إلغاء التحديث",
+			"status_4":"انتهى وقت التحديث، أعد المحاولة",
+			"status_5":"تم التحديث"
+		},
+		"imageResize":{
+			"ok":"تم",
+			"cancel":"إلغاء",
+			"reset":"إعادة ضبط"
+		},
+		"colorView": {
+			"rgb":"RGB",
+			"hub":"طيف",
+			"grid":"لوحة",
+			"alpha":"شفافية",
+			"hex":"HEX",
+			"r":"أحمر",
+			"g":"أخضر",
+			"b":"أزرق"
+		},
+		"modal": {
+			"title": "العنوان"
+		},
+		"mention": {
+			"placeholder": "أدخل المحتوى، @اختر صديق، ثم اضغط تأكيد"
+		},
+		"slideVerify": {
+			"tipsText": "اسحب إلى الموضع",
+			"tipsTextSuccess": "تم التحقق",
+			"tipsTextFail": "فشل التحقق"
+		},
+		"xRequest":{
+			"error":"خطأ في الخادم:",
+			"success":"نجاح",
+			"hostFailEmpty":"المجال فارغ",
+			"loading":"جاري التحميل"
+		}
+	}
+}
