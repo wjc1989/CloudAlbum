@@ -2,6 +2,7 @@
 import App from './App'
 // 源码用户
 import {xui} from "@/uni_modules/tmx-ui/index.uts"
+import { xRequest } from "@/uni_modules/tmx-ui/index.uts";
 
 //多语言配置类型 从1.1.15开始改变了安装配置表，使用了类型定义。
 import {Tmui4xOptions} from "@/uni_modules/tmx-ui/interface.uts" 
@@ -25,13 +26,12 @@ export function createApp() {
   let language:string= (uni.getStorageSync('language') as string | null) ?? 'en'
 	if(language==''){
 		language='en'
-	}
-	console.log("language:",uni.getStorageSync('language'),language);
+	} 
 	uni.setStorageSync("language",language);
 	app.use(xui,{i18nOptions:{locale:language,messages}} as Tmui4xOptions)
-	// xStore.xConfig.i18n.setLocale(language)
-	console.log(xStore.xConfig.i18n.getLocale())
-	console.log(xStore.xConfig.i18n.t('tmui4x.xRequest.error'))
+	
+	xRequest.setHostUrl("https://omessage.ecloudoman.com/prod-api")
+
   return {
     app
   }
