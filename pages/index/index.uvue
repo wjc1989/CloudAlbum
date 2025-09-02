@@ -18,12 +18,7 @@
 	<!-- #ifdef APP -->
 	</scroll-view>
 	<!-- #endif -->
-   <!-- ✅ 遮罩放在页面最后一个节点，盖住全屏 -->
-    <view v-if="saving" class="saving-mask" @touchmove.stop.prevent>
-      <view class="saving-box">
-        <text class="saving-text">Saving...</text>
-      </view>
-    </view>
+ 
 </template>
 
 <script lang="uts">
@@ -37,7 +32,7 @@
 				 saving: false            // ✅ 新增
 			}
 		},
-		onLoad() {      this.saving = true ;   this.randomData() },
+		onLoad() {  this.randomData() },
 		onReachBottom() { if (this.loading) return; this.onloadata() },
 		onPullDownRefresh() { this.list = [] as string[]; this.onloadata() },
 		computed: {
@@ -80,39 +75,46 @@
 
 			// 下载 -> 存相册（UTSJSONObject 取值）
 			handleSaveToAlbum(url: string) {
-			      this.saving = true       // ✅ 开遮罩
-			      uni.downloadFile({
-			        url,
-			        success: (res: DownloadFileSuccess) => {
-			          if (res.statusCode !== 200) {
-			            this.saving = false
-			            uni.showModal({ title: 'Failed', content: 'HTTP ' + res.statusCode, showCancel: false })
-			            return
-			          }
-			          const temp = res.tempFilePath
-			          if (temp == null || temp.length === 0) {
-			            this.saving = false
-			            uni.showModal({ title: 'Failed', content: 'tempFilePath is empty', showCancel: false })
-			            return
-			          }
-			          uni.saveImageToPhotosAlbum({
-			            filePath: temp,
-			            success: () => {
-			              this.saving = false
-			              uni.showToast({ title: 'Saved to Photos', icon: 'success' })
-			            },
-			            fail: (err) => {
-			              this.saving = false
-			              uni.showModal({ title: 'Failed', content: '' + err, showCancel: false })
-			            }
-			          })
-			        },
-			        fail: (e) => {
-			          this.saving = false
-			          uni.showModal({ title: 'Failed', content: '' + e, showCancel: false })
-			        }
-			      })
-			    },
+				setTimeout(()=> {
+					uni.showLoading({
+						title:"Saving...",
+						mask:true
+					})
+				}, 300);
+					uni.downloadFile({
+					  url,
+					  success: (res: DownloadFileSuccess) => {
+					    if (res.statusCode !== 200) {
+					      uni.hideLoading()
+					      uni.showModal({ title: 'Failed', content: 'HTTP ' + res.statusCode, showCancel: false })
+					      return
+					    }
+					    const temp = res.tempFilePath
+					    if (temp == null || temp.length === 0) {
+					      uni.hideLoading()
+					      uni.showModal({ title: 'Failed', content: 'tempFilePath is empty', showCancel: false })
+					      return
+					    }
+					    uni.saveImageToPhotosAlbum({
+					      filePath: temp,
+					      success: () => {
+					        uni.hideLoading()
+					        uni.showToast({ title: 'Saved to Photos', icon: 'success' })
+					      },
+					      fail: (err) => {
+					        uni.hideLoading()
+					        uni.showModal({ title: 'Failed', content: '' + err, showCancel: false })
+					      }
+					    })
+					  },
+					  fail: (e) => {
+					    uni.hideLoading()
+					    uni.showModal({ title: 'Failed', content: '' + e, showCancel: false })
+					  }
+					})
+	
+			      
+			},
 
 			randomData() {
 				const total = this.list.length
@@ -135,32 +137,6 @@
 	}
 </script>
 <style lang="scss">
-.page-root{
-  flex: 1;
-  position: relative; /* ✅ 让绝对定位相对它铺满 */
-}
-
-.saving-mask{
-  position: absolute; /* ✅ uvue 用 absolute 更稳 */
-  left: 0; top: 0; right: 0; bottom: 0;
-  background-color: rgba(0,0,0,0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
-  /* #ifdef APP-ANDROID */
-  elevation: 99;      /* ✅ 提升原生层级，防止被原生视图盖住 */
-  /* #endif */
-}
-
-.saving-box{
-  padding: 16px 20px;
-  background-color: rgba(20,20,20,0.9);
-  border-radius: 12px;
-}
-
-.saving-text{
-  color: #fff;
-  font-size: 16px;
-}
+ 
+ 
 </style>
