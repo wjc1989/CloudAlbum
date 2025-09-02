@@ -1,0 +1,15 @@
+//统一的请求响应结构体
+export type resultDataType = {
+	msg:string,
+	code:number,
+	data:any
+}
+ 
+// 统一的列表结构体
+export type resultListType<T>= {
+	total:number,
+	rows:T[],
+	msg:string,
+	code:number
+}
+ 

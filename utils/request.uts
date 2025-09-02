@@ -1,0 +1,178 @@
+import { xRequest } from "@/uni_modules/tmx-ui/index.uts";
+import { xRequestMethond, xRequestOptions,xRequestResult } from "@/uni_modules/tmx-ui/interface";
+import {  resultDataType,resultListType} from "./interface.uts";
+
+export function rq<T>(url : string, method : xRequestMethond = "POST", customData : UTSJSONObject = {} as UTSJSONObject,useCache:boolean = false):Promise<T|null> {
+	let xrq = new xRequest({
+		showErrorToast:false,
+		showSuccessToast:false
+	})  
+	//表单数据格式 'Content-Type': 'application/x-www-form-urlencoded',
+	//json格式 'Content-Type': 'application/json',
+	//上传格式 'Content-Type': 'multipart/form-data',
+	return new Promise((resovel,rej)=>{
+	
+		xrq.request({
+			url: url,
+			method: method,
+			data: customData,
+			useCache:useCache,
+			loadToastText:"Loading...", 
+			header: { 
+				"Content-Type": "application/json"
+			} as UTSJSONObject
+		} as xRequestOptions)
+		.then((resBydata)=>{
+			console.log("resBydata:",resBydata);
+			let res = resBydata! as xRequestResult;
+			
+			if(res.statusCode!=200){
+				uni.showModal({
+					title:"Error",
+					content:`Erro Code:${res.statusCode}`
+				})
+				rej(null)
+				return;
+			}
+			let reqData = res.data as any|null;
+			
+			if(typeof reqData == 'string'){
+				reqData = JSON.parseObject(reqData! as string)
+			}
+			if(typeof reqData != 'object' || reqData==null){
+				uni.showModal({
+					title:"Error",
+					content:`Server Error`
+				})
+				rej(null)
+				return;
+			}
+			
+			let rdata = reqData! as  UTSJSONObject;
+			
+			let msgdata = JSON.stringify(rdata) as string
+			
+			let d = JSON.parse<resultDataType|null>(msgdata)
+			
+			if(d==null) {
+				rej(null)
+				return;
+			}
+			
+			if(d.code == -1){
+				uni.showToast({
+					title:"Not Login",
+					icon:"none"
+				})
+				// 这里可以跳转到登录页面.或者不执行.
+				rej(null)
+				return
+			}
+			
+			if(d.code != 0){
+				uni.showToast({
+					title:d.msg,
+					icon:"none"
+				})
+				// 这里可以跳转到登录页面.或者不执行.
+				rej(null)
+				return
+			}
+			
+			
+			resovel(d.data as T|null)
+			
+		})
+		.catch((err)=>{
+			
+			rej(err)
+		})
+	})
+}
+
+export function rqList<T>(url : string, method : xRequestMethond = "POST", customData : UTSJSONObject = {} as UTSJSONObject,useCache:boolean = false):Promise<resultListType<T>|null> {
+	let xrq = new xRequest({
+		showErrorToast:false,
+		showSuccessToast:false
+	})  
+	//表单数据格式 'Content-Type': 'application/x-www-form-urlencoded',
+	//json格式 'Content-Type': 'application/json',
+	//上传格式 'Content-Type': 'multipart/form-data',
+	return new Promise((resovel,rej)=>{
+	
+		xrq.request({
+			url: url,
+			method: method,
+			data: customData,
+			useCache:useCache,
+			loadToastText:"Loading...",
+			header: { 
+				"Content-Type": "application/json"
+			} as UTSJSONObject
+		} as xRequestOptions)
+		.then((resBydata)=>{
+			console.log("resBydata:",resBydata);
+			let res = resBydata! as xRequestResult;
+			
+			if(res.statusCode!=200){
+				uni.showModal({
+					title:"Error",
+					content:`Erro Code:${res.statusCode}`
+				})
+				rej(null)
+				return;
+			}
+			let reqData = res.data as any|null;
+	  
+			if(typeof reqData == 'string'){
+				reqData = JSON.parseObject(reqData! as string)
+			}
+			if(typeof reqData != 'object' || reqData==null){
+				uni.showModal({
+					title:"Error",
+					content:`Server Error`
+				})
+				rej(null)
+				return;
+			}
+			
+			let rdata = reqData! as  UTSJSONObject;
+			
+			let msgdata = JSON.stringify(rdata) as string
+			
+			let d = JSON.parse<resultListType<T>>(msgdata)
+			
+			if(d==null) {
+				rej(null)
+				return;
+			}
+			
+			if(d.code == -1){
+				uni.showToast({
+					title:"Not Login",
+					icon:"none"
+				})
+				// 这里可以跳转到登录页面.或者不执行.
+				rej(null)
+				return
+			}
+			
+			if(d.code != 200){
+				uni.showToast({
+					title:d.msg,
+					icon:"none"
+				})
+				// 这里可以跳转到登录页面.或者不执行.
+				rej(null)
+				return
+			}
+			
+			
+			resovel(d)
+			
+		})
+		.catch((e) => {  
+		  rej(e)
+		})
+	})
+}
