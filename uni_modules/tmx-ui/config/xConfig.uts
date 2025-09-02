@@ -43,7 +43,7 @@ export const xProvitae = reactive({
  */
 export const xConfig = reactive({
 	theme:new Map<string,string>([]),
-	i18n:createI18n({messages,locale:'zh-Hans'}),
+	i18n:createI18n({messages,locale:'en'}),
 	/** 全局的主题色 */
 	color: "#0579FF",
 	/** 主题配置,auto,dark,light */
@@ -180,6 +180,7 @@ export const xTabbarConfig = reactive({
  */
 export const setConfig = (configs:Tmui4xOptions|null)=>{
 	let localLang = uni.getStorageSync("language") as string|null;
+	console.log("localLang:",localLang)
 	if(configs != null && configs?.i18nOptions != null){
 		let opts = configs.i18nOptions;
 		xConfig.i18n = createI18n(opts)

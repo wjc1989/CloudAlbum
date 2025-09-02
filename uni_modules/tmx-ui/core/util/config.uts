@@ -13,8 +13,8 @@ export const xRequestCall = reactive({
 	/** 请求前是否显示loading遮罩 */
 	showLoadToast:true,
 	/** 请求成功后是否提示，否则不提示 */
-	showSuccessToast:true,
+	showSuccessToast:false,
 	/** 出错时，是否显示提示,否则不提示 */
-	showErrorToast:true
+	showErrorToast:false
 } as X_REQUEST_PRIVATE_CALL_FUN_TYPE)
 

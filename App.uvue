@@ -10,7 +10,7 @@
 				source: "url('/static/tmui4xLibs/static/remixicon.ttf')",
 				success() {
 					uni.setStorageSync("loadedFontBytmx", "true")
-					console.log('global loadFontFace uni.ttf success===')
+					// console.log('global loadFontFace uni.ttf success===')
 				},
 				fail(error) {
 					uni.setStorageSync("loadedFontBytmx", "")

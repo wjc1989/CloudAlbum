@@ -5,6 +5,8 @@ import {xui} from "@/uni_modules/tmx-ui/index.uts"
 
 //多语言配置类型 从1.1.15开始改变了安装配置表，使用了类型定义。
 import {Tmui4xOptions} from "@/uni_modules/tmx-ui/interface.uts" 
+	import { xStore } from "@/uni_modules/tmx-ui/index.uts"
+
 //下方是组件内部的语言包
 import en from "@/uni_modules/tmx-ui/localLanuage/en.json"
 import ar from "@/uni_modules/tmx-ui/localLanuage/ar.json"
@@ -13,17 +15,23 @@ import myEn from "@/locale/en.json"
 import myAr from "@/locale/ar.json"
 const messages : UTSJSONObject = {
 	"en":{...en,...myEn},
-	"ar":{...ar,...myAr},
-	"ja":ja
+	"ar":{...ar,...myAr}
+	// "ja":ja
 }
-console.log(messages); 
+// console.log(messages); 
 import { createSSRApp } from 'vue'
 export function createApp() {
   const app = createSSRApp(App) 
   let language:string= (uni.getStorageSync('language') as string | null) ?? 'en'
- 
+	if(language==''){
+		language='en'
+	}
+	console.log("language:",uni.getStorageSync('language'),language);
+	uni.setStorageSync("language",language);
 	app.use(xui,{i18nOptions:{locale:language,messages}} as Tmui4xOptions)
-
+	// xStore.xConfig.i18n.setLocale(language)
+	console.log(xStore.xConfig.i18n.getLocale())
+	console.log(xStore.xConfig.i18n.t('tmui4x.xRequest.error'))
   return {
     app
   }
