@@ -158,10 +158,13 @@ export function rqList<T>(url : string, method : xRequestMethond = "POST", custo
 			}
 			
 			if(d.code != 200){
-				uni.showToast({
-					title:d.msg,
-					icon:"none"
-				})
+				if(d.msg!=null&&d.msg!=''){
+					uni.showToast({
+						title:d.msg,
+						icon:"none"
+					})
+				}
+
 				// 这里可以跳转到登录页面.或者不执行.
 				rej(null)
 				return
