@@ -329,7 +329,8 @@
 
 
 	function onloadata() {
-		loading.value = true
+		loading.value = true;
+		console.log(`开始查询页:`,pageNum.value)
 		api.getImageList({pageNum:pageNum.value,pageSize:pageSize.value}).then((res:resultListType<ImageInfo>|null)=>{
 			console.log("getImageList:",res)
 	
@@ -338,6 +339,8 @@
 				if (rows != null) {
 					list.push(...rows)
 				}
+				console.log(rows.length);
+				console.log(list.length);
 				if(res.total != null){
 					totalPage.value = Math.ceil(res.total / pageSize.value)
 				}
