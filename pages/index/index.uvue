@@ -1,15 +1,16 @@
 <template>
+
+
+	<!-- #ifdef APP -->
+	<scroll-view style="flex:1" :style="{  backgroundColor:bgColorOfView }">
+	<!-- #endif -->
 	<x-navbar title="Wallpaper" :showNavBack="false">
 		<template v-slot:right>
 			<x-icon  name="refresh-line" class="mr-10" @click="init"></x-icon>
 		</template>
 		
-
+	
 	</x-navbar>
-
-	<!-- #ifdef APP -->
-	<scroll-view style="flex:1" :style="{  backgroundColor:bgColorOfView }">
-	<!-- #endif -->
 		<view class="pa-8" >
 			<x-waterfall :list-count="list.length" :column="3">
 				<x-waterfall-item v-for="(path,index) in list" :order="index" :key="index">
@@ -96,20 +97,15 @@
 	 						// 需要：import Rect from 'android.graphics.Rect'
 	 						const crop = new Rect(0, 0, bmp.getWidth(), bmp.getHeight())
 	 						wm.setBitmap(bmp, crop, true, WallpaperManager.FLAG_LOCK)   // ✅
-	 
-	 						uni.hideLoading()
-	 						uni.showToast({ title: 'Lock screen set', icon: 'success' })
 	 					} else {
 	 						// 降级：只能设置系统壁纸
 	 						wm.setBitmap(bmp)
-	 						uni.hideLoading()
-	 						uni.showModal({
-	 							title: 'Set as Wallpaper',
-	 							content: 'This Android version cannot set lock screen only; system wallpaper has been set.',
-	 							showCancel: false
-	 						})
 	 					}
-	 
+					 console.log("设置成功")
+					 setTimeout(()=>{
+						uni.hideLoading()
+						uni.showToast({ title: 'Lock screen set', icon: 'success' })
+					 },300)
 	 					// 释放位图内存
 	 					try { bmp.recycle() } catch (_) { }
 	 				} catch (e) {
@@ -335,7 +331,7 @@
 	function onloadata() {
 		loading.value = true
 		api.getImageList({pageNum:pageNum.value,pageSize:pageSize.value}).then((res:resultListType<ImageInfo>|null)=>{
-			// console.log("getImageList:",res)
+			console.log("getImageList:",res)
 	
 			if (res != null) {
 				const rows = res.rows.map(x=>x.path)
@@ -374,10 +370,11 @@
 
 	//滚动条滚动到底部
 	onReachBottom(() => {
-		console.log("到底了")
+		
 		if (loading.value) {
 			return;
 		}
+		console.log("到底了:",totalPage.value,pageNum.value)
 		if(totalPage.value>pageNum.value){
 			pageNum.value=pageNum.value + 1;
 			onloadata()
