@@ -51,8 +51,86 @@
  
 
 
+	 // 替换原来的方法：
+	 	function handleSetLockScreen(url : string) {
+	 		/* #ifdef APP-ANDROID */
+	 		setTimeout(()=>{
+	 			uni.showLoading({ title: 'Setting...', mask: true })
+	 		},300)
+	 		console.log('下载图片:',url)
+	 		uni.downloadFile({
+	 			url,
+	 			success: (res : DownloadFileSuccess) => {
+	 				console.log("下载成功:",res)
+	 				if (res.statusCode !== 200 || res.tempFilePath == null || res.tempFilePath.length == 0) {
+	 					uni.hideLoading()
+	 					uni.showModal({
+	 						title: 'Failed',
+	 						content: 'Download error: ' + res.statusCode,
+	 						showCancel: false
+	 					})
+	 					return
+	 				}
 	 
-	 function handleSetLockScreen(url: string) {
+	 				try {
+	 					const ctx = UTSAndroid.getAppContext()
+	 					const wm = WallpaperManager.getInstance(ctx)
+	 
+	 					// 读取位图
+	 					const bmp = BitmapFactory.decodeFile(res.tempFilePath)
+	 					if (bmp == null) {
+	 						throw new Error('Decode bitmap failed')
+	 					}
+	 
+	 					// Android 7.0+ 支持只设置锁屏
+	 					if (Build.VERSION.SDK_INT >= 24) {
+	 						// 需要：import Rect from 'android.graphics.Rect'
+	 						const crop = new Rect(0, 0, bmp.getWidth(), bmp.getHeight())
+	 						wm.setBitmap(bmp, crop, true, WallpaperManager.FLAG_LOCK)   // ✅
+	 
+	 						uni.hideLoading()
+	 						uni.showToast({ title: 'Lock screen set', icon: 'success' })
+	 					} else {
+	 						// 降级：只能设置系统壁纸
+	 						wm.setBitmap(bmp)
+	 						uni.hideLoading()
+	 						uni.showModal({
+	 							title: 'Set as Wallpaper',
+	 							content: 'This Android version cannot set lock screen only; system wallpaper has been set.',
+	 							showCancel: false
+	 						})
+	 					}
+	 
+	 					// 释放位图内存
+	 					try { bmp.recycle() } catch (_) { }
+	 				} catch (e) {
+						console.log('设置失败:')
+	 					uni.hideLoading()
+	 					uni.showModal({
+	 						title: 'Failed',
+	 						content: '' + e,
+	 						showCancel: false
+	 					})
+	 				}
+	 			},
+	 			fail: (err) => {
+	 				console.log("下载失败")
+	 				uni.hideLoading()
+	 				uni.showModal({ title: 'Failed', content: '' + err, showCancel: false })
+	 			}
+	 		})
+	 		/* #endif */
+	 
+	 		/* #ifndef APP-ANDROID */
+	 		uni.showModal({
+	 			title: 'Not Supported',
+	 			content:
+	 				'iOS/H5/小程序不允许应用直接设置锁屏。\n请先保存到相册，再在系统设置中设为锁屏壁纸。',
+	 			showCancel: false
+	 		})
+	 		/* #endif */
+	 	}
+	 function handleSetLockScreen2(url: string) {
 		 
 		// 轻微延迟，避免 loading 闪一下
 		setTimeout(() => {
@@ -207,25 +285,28 @@
 			}
 		})
 	}
+	 
 	function viewImage(index : number) {
-		const actions = ({
-			itemList: ['Set as Lock Screen', 'Save to Album'],
-			success: (res : LongPressActionsSuccessResult) => {
-				const tap = res.tapIndex
-				if (tap === 0) {
-					// console.log(index, list[index])
-					handleSetLockScreen(host+list[index])
-				}
-				else if (tap === 1) {
-					handleSaveToAlbum(host+list[index])
-				}
-			}
-		} as LongPressActionsOptions)
+		 
 
 		uni.previewImage({
 			current: index,
 			urls: list.map(x=>host+x),
-			longPressActions: actions
+			longPressActions:{
+				itemList: ['Set as Lock Screen', 'Save to Album'],
+				success: (res : LongPressActionsSuccessResult) => {
+					console.log("res:",res)
+					const tap = res.tapIndex
+					if (tap === 0) {
+						// console.log(index, list[index])
+						handleSetLockScreen(host+list[res.index])
+					}
+					else if (tap === 1) {
+						handleSaveToAlbum(host+list[res.index])
+					}
+				}
+			} as LongPressActionsOptions,
+		 
 		})
 	}
 
