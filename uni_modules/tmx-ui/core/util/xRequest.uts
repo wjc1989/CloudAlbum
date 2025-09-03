@@ -656,7 +656,7 @@ export class xRequest {
 							if (_thisOpts.showLoadToast) {
 								uni.hideLoading()
 							}
-							if(er.errCode==1000){
+							if(er.errCode==1000||er.errCode==602001){
 								uni.showToast({title:'No network!',mask:true,icon:'error'});
 							}
 							if (_thisOpts.showErrorToast) {

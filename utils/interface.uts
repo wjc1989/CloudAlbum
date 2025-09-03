@@ -9,7 +9,7 @@ export type resultDataType = {
 export type resultListType<T>= {
 	total:number,
 	rows:T[],
-	msg:string,
+	msg?:string,
 	code:number
 }
  
