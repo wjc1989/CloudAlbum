@@ -29,7 +29,10 @@
 	import BitmapFactory from 'android.graphics.BitmapFactory'
 	import UTSAndroid from 'io.dcloud.uts.UTSAndroid'
 	import Rect from 'android.graphics.Rect'
+	import Bitmap from 'android.graphics.Bitmap'
+	
 	/* #endif */
+ 
 	import { xStore } from "@/uni_modules/tmx-ui/index.uts"
 	import { xRequest } from "../../uni_modules/tmx-ui/index.uts";
 	import { resultListType } from '../../utils/interface.uts'
@@ -48,84 +51,121 @@
  
 
 
-	// 替换原来的方法：
-	function handleSetLockScreen(url : string) {
-		/* #ifdef APP-ANDROID */
-		setTimeout(()=>{
+	 
+	 function handleSetLockScreen(url: string) {
+		 
+		// 轻微延迟，避免 loading 闪一下
+		setTimeout(() => {
 			uni.showLoading({ title: 'Setting...', mask: true })
-		},300)
-		// console.log('下载图片:',url)
-		uni.downloadFile({
-			url,
-			success: (res : DownloadFileSuccess) => {
-				// console.log("下载成功:",res)
-				if (res.statusCode !== 200 || res.tempFilePath == null || res.tempFilePath.length == 0) {
-					uni.hideLoading()
-					uni.showModal({
-						title: 'Failed',
-						content: 'Download error: ' + res.statusCode,
-						showCancel: false
-					})
-					return
-				}
+		}, 300)
+	   /* #ifdef APP-ANDROID */
+	   // 获取Android上下文
+	   const _ctxMaybe = UTSAndroid.getAppContext()
+	   if (_ctxMaybe == null) {
+	     uni.showModal({ title: 'Failed', content: 'No Android context', showCancel: false })
+	     return
+	   }
+	   const ctx = _ctxMaybe!  // non-null
+	 
+	   // 计算 inSampleSize，返回 number；设置时再强制成 Int
+	   function computeInSampleSize(srcW: number, srcH: number, reqW: number, reqH: number): number {
+	     let inSampleSize = 1
+	     if (srcH > reqH || srcW > reqW) {
+	       let halfH = srcH / 2
+	       let halfW = srcW / 2
+	       while ((halfH / inSampleSize) >= reqH && (halfW / inSampleSize) >= reqW) {
+	         inSampleSize *= 2
+	       }
+	     }
+	     return inSampleSize < 1 ? 1 : inSampleSize
+	   }
+	 
+	   // 解码并“拉伸到屏幕宽高”（会变形，但铺满）
+	   function decodeAndStretchToScreen(path: string): Bitmap {
+	       const dm = ctx?.getResources()?.getDisplayMetrics()
+	       if (dm == null) throw new Error('Get display metrics failed')
+	     const sw = dm.widthPixels
+	     const sh = dm.heightPixels
+	 
+	     // 1) 只读 bounds
+	     const optsBounds = new BitmapFactory.Options()
+	     optsBounds.inJustDecodeBounds = true
+	     BitmapFactory.decodeFile(path, optsBounds)
+	     const srcW = optsBounds.outWidth
+	     const srcH = optsBounds.outHeight
+	     if (srcW <= 0 || srcH <= 0) throw new Error('Decode bounds failed')
+	 
+	     // 2) 降采样解码
+	     const opts = new BitmapFactory.Options()
+	     // 用位运算 |0 把 number 强制为 Int，满足 Kotlin/UTS 的 Int 要求
+	       opts.inSampleSize = Math.floor(Math.max(1, computeInSampleSize(srcW, srcH, sw, sh))) as Int
+	     opts.inPreferredConfig = Bitmap.Config.RGB_565
+	     const origin = BitmapFactory.decodeFile(path, opts)
+	     if (origin == null) throw new Error('Decode bitmap failed')
+	 
+	     try {
+	       // 3) 拉伸到屏幕尺寸（会变形）
+	       const stretched = Bitmap.createScaledBitmap(origin, sw, sh, true)
+	       return stretched
+	     } finally {
+	       try { origin.recycle() } catch (_) {}
+	     }
+	   }
+	 
+	   function applyLockScreen(bmp: Bitmap) {
+	     const wm = WallpaperManager.getInstance(ctx!)
+	     if (Build.VERSION.SDK_INT >= 24) {
+	       const crop = new Rect(0, 0, bmp.getWidth(), bmp.getHeight())
+	       wm.setBitmap(bmp, crop, true, WallpaperManager.FLAG_LOCK)
+	     } else {
+	       wm.setBitmap(bmp) // 低版本：只能设置系统壁纸
+	     }
+	   }
 
-				try {
-					const ctx = UTSAndroid.getAppContext()
-					const wm = WallpaperManager.getInstance(ctx)
-
-					// 读取位图
-					const bmp = BitmapFactory.decodeFile(res.tempFilePath)
-					if (bmp == null) {
-						throw new Error('Decode bitmap failed')
-					}
-
-					// Android 7.0+ 支持只设置锁屏
-					if (Build.VERSION.SDK_INT >= 24) {
-						// 需要：import Rect from 'android.graphics.Rect'
-						const crop = new Rect(0, 0, bmp.getWidth(), bmp.getHeight())
-						wm.setBitmap(bmp, crop, true, WallpaperManager.FLAG_LOCK)   // ✅
-
-						uni.hideLoading()
-						uni.showToast({ title: 'Lock screen set', icon: 'success' })
-					} else {
-						// 降级：只能设置系统壁纸
-						wm.setBitmap(bmp)
-						uni.hideLoading()
-						uni.showModal({
-							title: 'Set as Wallpaper',
-							content: 'This Android version cannot set lock screen only; system wallpaper has been set.',
-							showCancel: false
-						})
-					}
-
-					// 释放位图内存
-					try { bmp.recycle() } catch (_) { }
-				} catch (e) {
-					uni.hideLoading()
-					uni.showModal({
-						title: 'Failed',
-						content: '' + e,
-						showCancel: false
-					})
-				}
-			},
-			fail: (err) => {
-				console.log("下载失败")
-				uni.hideLoading()
-				uni.showModal({ title: 'Failed', content: '' + err, showCancel: false })
-			}
-		})
-		/* #endif */
-
-		/* #ifndef APP-ANDROID */
-		uni.showModal({
-			title: 'Not Supported',
-			content:
-				'iOS/H5/小程序不允许应用直接设置锁屏。\n请先保存到相册，再在系统设置中设为锁屏壁纸。',
-			showCancel: false
-		})
-		/* #endif */
-	}
+	 
+	   uni.downloadFile({
+	     url,
+	     success: (res: DownloadFileSuccess) => {
+	       // 显式判空，避免 “Unresolved reference: !”
+	       if (res.statusCode !== 200 || res.tempFilePath == null || res.tempFilePath.length === 0) {
+	         uni.hideLoading()
+	         uni.showModal({
+	           title: 'Failed',
+	           content: 'Download error: ' + res.statusCode,
+	           showCancel: false
+	         })
+	         return
+	       }
+	 
+	       try {
+	         const stretched = decodeAndStretchToScreen(res.tempFilePath)
+	         try {
+	           applyLockScreen(stretched)
+	           uni.hideLoading()
+	           uni.showToast({ title: 'Lock screen set', icon: 'success' })
+	         } finally {
+	           try { stretched.recycle() } catch (_) {}
+	         }
+	       } catch (e) {
+	         uni.hideLoading()
+	         uni.showModal({ title: 'Failed', content: '' + e, showCancel: false })
+	       }
+	     },
+	     fail: (err) => {
+	       uni.hideLoading()
+	       uni.showModal({ title: 'Failed', content: '' + err, showCancel: false })
+	     }
+	   })
+	   /* #endif */
+	 
+	   /* #ifndef APP-ANDROID */
+	   uni.showModal({
+	     title: 'Not Supported',
+	     content: 'iOS/H5/小程序不允许应用直接设置锁屏。请先保存到相册，再在系统设置中设为锁屏壁纸。',
+	     showCancel: false
+	   })
+	   /* #endif */
+	 }
 
 
 	function handleSaveToAlbum(url : string) {

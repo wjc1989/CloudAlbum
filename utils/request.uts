@@ -142,7 +142,7 @@ export function rqList<T>(url : string, method : xRequestMethond = "POST", custo
 			} as UTSJSONObject
 		} as xRequestOptions)
 		.then((resBydata)=>{
-			console.log("resBydata:",resBydata);
+			// console.log("resBydata:",resBydata);
 			let res = resBydata! as xRequestResult;
 			
 			if(res.statusCode!=200){
