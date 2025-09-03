@@ -1,5 +1,5 @@
 <template>
-	<x-navbar title="Cloud Album" :showNavBack="false">
+	<x-navbar title="Wallpaper" :showNavBack="false">
 		<template v-slot:right>
 			<x-icon  name="refresh-line" class="mr-10" @click="init"></x-icon>
 		</template>
