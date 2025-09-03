@@ -3,7 +3,8 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "Cloud Album"
+				"navigationBarTitleText": "",
+				"navigationStyle":"custom"
 			}
 		}
 	],

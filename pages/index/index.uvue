@@ -1,12 +1,20 @@
 <template>
+	<x-navbar title="Cloud Album" :showNavBack="false">
+		<template v-slot:right>
+			<x-icon  name="refresh-line" class="mr-10" @click="init"></x-icon>
+		</template>
+		
+
+	</x-navbar>
+
 	<!-- #ifdef APP -->
-	<scroll-view style="flex:1">
+	<scroll-view style="flex:1" :style="{  backgroundColor:bgColorOfView }">
 	<!-- #endif -->
-		<view class="px-8">
+		<view class="pa-8" >
 			<x-waterfall :list-count="list.length" :column="3">
 				<x-waterfall-item v-for="(path,index) in list" :order="index" :key="index">
 					<template v-slot:default="col">
-						<view class="pa-1" :style="{ borderRadius:'6px', backgroundColor:bgColorOfView }">
+						<view class="pa-1" :style="{ borderRadius:'6px'}">
 							<image @click="viewImage(index)" style="width:100%;height:120px" :src="host+path">
 							</image>
 						</view>
@@ -45,6 +53,7 @@
 	const totalPage=ref(0);
 	const pageNum=ref(1);
 	const pageSize=ref(21)
+	xStore.setDarkModel('auto')
 
 	const bgColorOfView = computed(() => { return xStore.xConfig.dark == 'dark' ? xStore.xConfig.sheetDarkColor : 'white' })
 	const textColorOfView = computed(() => { return xStore.xConfig.dark == 'dark' ? 'white' : '#333333' })
@@ -320,6 +329,7 @@
 			list.push( makeUrl(total + i) )
 		}
 	}
+	
 
 
 	function onloadata() {
@@ -352,14 +362,19 @@
 		// 	uni.stopPullDownRefresh()
 		// }, 800)
 	}
-
+	function init(){
+		list.length=0;
+		pageNum.value=1;
+		onloadata()
+	}
 	onLoad(() => {
 		// randomData()
-		onloadata()
+		init()
 	})
 
 	//滚动条滚动到底部
 	onReachBottom(() => {
+		console.log("到底了")
 		if (loading.value) {
 			return;
 		}
@@ -370,13 +385,7 @@
 		
 	})
 	 
-	onPullDownRefresh(() => {
-		list.length = 0;
-		
-		pageNum.value=1;
-		console.log("下拉刷新");
-		onloadata();
-	})
+	
 </script>
 <style lang="scss">
 
