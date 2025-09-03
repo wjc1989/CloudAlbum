@@ -1,13 +1,18 @@
-import { rq,rqList } from "../utils/request";
+import { rqList } from "../utils/request";
  
-import {  resultDataType,resultListType,LISTPAGEART_TYPE } from "../utils/interface.uts"
+import {resultListType } from "../utils/interface.uts"
 //统一的请求响应结构体
-export type ImageInfo = {
-	path:string
+export class ImageInfo  {
+	path:string=''
+	constructor(path:string) { // 构造函数，参数newname 
+		this.path = path;
+	}
 }
 export class api {
 	//请求文章列表.
-	public static  async getImageList<ImageInfo>(arg:UTSJSONObject):Promise<resultListType<ImageInfo>|null>{
-		return rqList<ImageInfo>('/system/attachments/list2','GET',arg,true);
+	public static  async getImageList(arg:UTSJSONObject):Promise<resultListType<ImageInfo>|null>{
+		return rqList('/system/attachments/list2','GET',arg,true,(o)=>{
+				return new ImageInfo(o['path']! as string)
+		});
 	}
 }

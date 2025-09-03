@@ -89,8 +89,39 @@ export function rq<T>(url : string, method : xRequestMethond = "POST", customDat
 		})
 	})
 }
+function toNumberSafe(v: any, def: number): number {
+  if (v == null) return def
+  if (typeof v === 'number') return v as number
+  if (typeof v === 'string') {
+    const n = parseFloat(v as string)
+    return isNaN(n) ? def : n
+  }
+  return def
+}
 
-export function rqList<T>(url : string, method : xRequestMethond = "POST", customData : UTSJSONObject = {} as UTSJSONObject,useCache:boolean = false):Promise<resultListType<T>|null> {
+function parseResultListFromString<T>(
+  msgdata: string,
+  mapper: (obj: UTSJSONObject) => T
+): resultListType<T> {
+  const raw = JSON.parse(msgdata) as UTSJSONObject
+
+  // rows 可能是数组，或 { records: [...] }
+  const rowsField = raw['rows'] as any | null
+  let rows: T[] = [] 
+  if (rowsField != null) {
+    rows = (rowsField as UTSJSONObject[]).map(o => mapper(o))
+  }
+
+  const total = raw['total'] as number
+  const code  =raw['code'] as number
+  const msg=raw['msg'] as string|null
+  const out: resultListType<T> = { rows, total, code ,msg}
+ 
+
+  return out
+}
+
+export function rqList<T>(url : string, method : xRequestMethond = "POST", customData : UTSJSONObject = {} as UTSJSONObject,useCache:boolean = false,mapper: (obj: UTSJSONObject) => T):Promise<resultListType<T>|null> {
 	let xrq = new xRequest({
 		showErrorToast:false,
 		showSuccessToast:false
@@ -140,8 +171,9 @@ export function rqList<T>(url : string, method : xRequestMethond = "POST", custo
 			
 			let msgdata = JSON.stringify(rdata) as string
 			
-			let d = JSON.parse<resultListType<T>>(msgdata)
-			
+			// let d = JSON.parse<resultListType<T>>(msgdata)
+			let d: resultListType<T> = parseResultListFromString<T>(msgdata, mapper)
+
 			if(d==null) {
 				rej(null)
 				return;

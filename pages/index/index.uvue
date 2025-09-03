@@ -4,10 +4,10 @@
 	<!-- #endif -->
 		<view class="px-8">
 			<x-waterfall :list-count="list.length" :column="3">
-				<x-waterfall-item v-for="(item,index) in list" :order="index" :key="index">
+				<x-waterfall-item v-for="(path,index) in list" :order="index" :key="index">
 					<template v-slot:default="col">
 						<view class="pa-1" :style="{ borderRadius:'6px', backgroundColor:bgColorOfView }">
-							<image @click="viewImage(index)" style="width:100%;height:120px" :src="makeUrl(index)">
+							<image @click="viewImage(index)" style="width:100%;height:120px" :src="host+path">
 							</image>
 						</view>
 					</template>
@@ -36,6 +36,7 @@
  
 	import { api ,ImageInfo} from '../../api/api.uts'
 	
+	const host='https://omessage.ecloudoman.com/prod-api'
 	const list = reactive([] as string[]);
 	const loading = ref(false);
 	const totalPage=ref(0);
@@ -200,7 +201,7 @@
 
 	function onloadata() {
 		loading.value = true
-		api.getImageList<ImageInfo>({pageNum:pageNum.value,pageSize:pageSize.value}).then((res:resultListType<ImageInfo>|null)=>{
+		api.getImageList({pageNum:pageNum.value,pageSize:pageSize.value}).then((res:resultListType<ImageInfo>|null)=>{
 			console.log("getImageList:",res)
 	
 			if (res != null) {
@@ -218,7 +219,7 @@
 			
 			
 			loading.value = false
-			uni.stopPullDownRefresh()
+			// uni.stopPullDownRefresh()
 		})
 		// uni.showLoading({ title: 'Loading...', mask: true })
 		// setTimeout(() => {
@@ -230,7 +231,8 @@
 	}
 
 	onLoad(() => {
-		randomData()
+		// randomData()
+		onloadata()
 	})
 
 	//滚动条滚动到底部
@@ -238,13 +240,18 @@
 		if (loading.value) {
 			return;
 		}
-		onloadata()
+		if(totalPage.value>pageNum.value){
+			pageNum.value=pageNum.value + 1;
+			onloadata()
+		}
+		
 	})
 	//下拉刷新
-	onPullDownRefresh(() => {
-		list.length = 0;
-		onloadata();
-	})
+	// onPullDownRefresh(() => {
+	// 	list.length = 0;
+	// 	pageNum.value
+	// 	onloadata();
+	// })
 </script>
 <style lang="scss">
 
