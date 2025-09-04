@@ -6,12 +6,10 @@ import { xRequest } from "@/uni_modules/tmx-ui/index.uts";
 
 //多语言配置类型 从1.1.15开始改变了安装配置表，使用了类型定义。
 import {Tmui4xOptions} from "@/uni_modules/tmx-ui/interface.uts" 
-	import { xStore } from "@/uni_modules/tmx-ui/index.uts"
 
 //下方是组件内部的语言包
 import en from "@/uni_modules/tmx-ui/localLanuage/en.json"
 import ar from "@/uni_modules/tmx-ui/localLanuage/ar.json"
-import ja from "@/uni_modules/tmx-ui/localLanuage/ja.json"
 import myEn from "@/locale/en.json"
 import myAr from "@/locale/ar.json"
 const messages : UTSJSONObject = {
