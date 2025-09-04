@@ -23,7 +23,6 @@
 		onShow: function () { },
 		onHide: function () { },
 		onLastPageBackPress: function () {  
-			  console.log('App LastPageBackPress')
 			  if (firstBackTime == 0) {
 				uni.showToast({
 				  title: 'Paress again to exit the app',

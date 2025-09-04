@@ -130,7 +130,7 @@ export function rqList<T>(url : string, method : xRequestMethond = "POST", custo
 	//json格式 'Content-Type': 'application/json',
 	//上传格式 'Content-Type': 'multipart/form-data',
 	return new Promise((resovel,rej)=>{
-	
+		console.log("useCache:",useCache)
 		xrq.request({
 			url: url,
 			method: method,

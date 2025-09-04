@@ -11,7 +11,7 @@ export class ImageInfo  {
 export class api {
 	//请求文章列表.
 	public static  async getImageList(arg:UTSJSONObject):Promise<resultListType<ImageInfo>|null>{
-		return rqList('/system/attachments/list2','GET',arg,true,(o)=>{
+		return rqList('/system/attachments/list2','GET',arg,false,(o)=>{
 				return new ImageInfo(o['path']! as string)
 		});
 	}
