@@ -1,70 +1,116 @@
-import { xDateArrayItem,xDateArrayItemType,xCalendarArgs,xCalendarMode } from "../x-calendar-view/interface.uts"
+import { xDateArrayItem, xDateArrayItemType, xCalendarArgs, xCalendarMode } from "../x-calendar-view/interface.uts"
 import { getDefaultColor, hexToRgb, rgbToHex } from "../../core/util/xCoreColorUtil.uts"
-	import { checkIsCssUnit } from "../../core/util/xCoreUtil.uts"
-	import { xConfig } from "../../config/xConfig.uts"
+import { checkIsCssUnit } from "../../core/util/xCoreUtil.uts"
+import { xConfig } from "../../config/xConfig.uts"
+import {xCalendarDateStyleStatusType} from "@/uni_modules/tmx-ui/interface.uts"
+import { xDate } from "../../core/util/xDate.uts"
 export class calendarDraw {
-	ele:UniElement|null = null
-	proxy:any|null = null
+	ele : UniElement | null = null
+	proxy : any | null = null
 	cellHeight = 50;
 	sapce = 5
-	model:xCalendarMode = 'day'
-	_fontSize:string =  checkIsCssUnit('16',xConfig.unit)
-	constructor(target:UniElement|null,proxyx:any|null){
+	model : xCalendarMode = 'day'
+	_fontSize : string = checkIsCssUnit('16', xConfig.unit)
+	_dateStatus : xCalendarDateStyleStatusType[] | null = null;
+	constructor(target : UniElement | null, proxyx : any | null) {
 		this.ele = target
 		this.proxy = proxyx
 	}
-	showLabel(item:xDateArrayItemType):string {
-		if(item.isInstart&&item.isInEnd&&this.model=='range') return '本日'
-		if(item.isInstart&&!item.isInEnd&&this.model=='range') return '开始'
-		if(!item.isInstart&&item.isInEnd&&this.model=='range') return '结束'
+	checkDataIsInDateStatus(date:string|null):string{
+		if(date ==''||date == null || this._dateStatus == null) return '';
+		for(let k =0 ;k <this._dateStatus.length;k++){
+			let itemStatus = this._dateStatus[k]
+			let dates = itemStatus?.date??[];
+			let start = itemStatus?.between?.start??''
+			let end = itemStatus?.between?.end??''
+			let betweenColor = itemStatus?.between?.color??''
+			let notDates = itemStatus?.between?.notDate??[]
+			let nowDate = new xDate(date);
+			let isInBetweenDate = false;
+			if(start!=''&&end!=''){
+				let isBetween = nowDate.isBetween(new xDate(start),new xDate(end),'d','[]');
+				let isNotDate = false
+				for(let i=0;i<notDates.length;i++){
+					let item = notDates[i];
+					if(nowDate.isBetweenOf(new xDate(item),'=','d')){
+						isNotDate = true;
+						break;
+					}
+				}
+				isInBetweenDate = isBetween && !isNotDate
+			}
+			if(isInBetweenDate) return getDefaultColor(betweenColor==''?'primary':betweenColor)
+			
+			let selfColor = ''
+			for(let i=0;i<dates.length;i++){
+				let item = dates[i];
+				if(nowDate.isBetweenOf(new xDate(item.date),'=','d')){
+					selfColor = item.color==''?'primary':item.color
+					break;
+				}
+				
+			}
+			if(selfColor!=''){
+				return getDefaultColor(selfColor)
+			}
+			
+		}
+		
 		return ""
 	}
-	getColor(color:string,alpha:number):string{
-		if(alpha==1) return color;
+	
+	showLabel(item : xDateArrayItemType) : string {
+		if (item.isInstart && item.isInEnd && this.model == 'range') return '本日'
+		if (item.isInstart && !item.isInEnd && this.model == 'range') return '开始'
+		if (!item.isInstart && item.isInEnd && this.model == 'range') return '结束'
+		return ""
+	}
+	getColor(color : string, alpha : number) : string {
+		if (alpha == 1) return color;
 		let rgba = hexToRgb(getDefaultColor(color));
 		return `rgba(${rgba.getNumber('r')},${rgba.getNumber('g')},${rgba.getNumber('b')},${alpha})`
 	}
-	_draw(element:UniElement,Grect:DOMRect,list:xDateArrayItemType[][]){
+	_draw(element : UniElement, Grect : DOMRect, list : xDateArrayItemType[][]) {
 		const ctx = element.getDrawableContext()!;
 		ctx.reset()
 		ctx.fillStyle = 'transparent'
-		ctx.fillRect(0, 0, Grect.width,Grect.height)
+		ctx.fillRect(0, 0, Grect.width, Grect.height)
 		ctx.textAlign = 'center'
 		const _realCellWidth = Grect.width / 7
-		const _h = Math.min(_realCellWidth,50) - this.sapce*2
+		const _h = Math.min(_realCellWidth, 50) - this.sapce * 2
 		for (let i = 0; i < list.length; i++) {
 			const children = list[i]
-			for(let col=0;col<children.length;col++){
+			for (let col = 0; col < children.length; col++) {
 				let item = children[col];
 				let dstyle = item.style
-				
+
 				let xy_x = _realCellWidth * col + _realCellWidth / 2;
 				let xy_y = this.cellHeight * i + this.cellHeight / 2;
-				
+
 				// 绘制选中的背景
-				ctx.fillStyle = this.getColor(dstyle.dstyle.backgroundColor,(item.disabled||!item.inCurrentMonth)&&!item.isInstart&&!item.isInEnd?0.3:1);
-				
-				if(dstyle.dstyle.backgroundColor!='transparent'){
+				ctx.fillStyle = this.getColor(dstyle.dstyle.backgroundColor, (item.disabled || !item.inCurrentMonth) && !item.isInstart && !item.isInEnd ? 0.3 : 1);
+
+				if (dstyle.dstyle.backgroundColor != 'transparent') {
 					ctx.beginPath()
-					ctx.arc(xy_x, xy_y, _h/2, 0, Math.PI * 2)
+					ctx.arc(xy_x, xy_y, _h / 2, 0, Math.PI * 2)
 					ctx.closePath()
 					ctx.fill()
 				}
-				
+
 				// 绘制右角标。
 				if (dstyle.dot.dot) {
-					
-					if (dstyle.dot.dotLabel=='') {
-						let lastx = _realCellWidth * col + _realCellWidth / 2 + this.cellHeight/2 - 5;
+
+					if (dstyle.dot.dotLabel == '') {
+						let lastx = _realCellWidth * col + _realCellWidth / 2 + this.cellHeight / 2 - 5;
 						let lasty = _realCellWidth * (i) + 5
 						ctx.fillStyle = dstyle.dot.dotColor
 						ctx.beginPath()
 						ctx.arc(lastx, lasty, 4, 0, Math.PI * 2)
 						ctx.closePath()
 						ctx.fill()
-						
+
 					} else {
-						let lastx = _realCellWidth * col + _realCellWidth / 2 + this.cellHeight/2-10;
+						let lastx = _realCellWidth * col + _realCellWidth / 2 + this.cellHeight / 2 - 10;
 						let lasty = _realCellWidth * (i) + 10
 						ctx.fillStyle = dstyle.dot.dotColor;
 						ctx.beginPath()
@@ -81,24 +127,24 @@ export class calendarDraw {
 						// #endif
 					}
 				}
-				
-				
-				
+
+
+
 				// 绘制文字
 				const text = item.date.day.toString();
-				ctx.fillStyle = this.getColor(dstyle.dstyle.fontColor,(item.disabled||!item.inCurrentMonth)?0.7:1);
+				ctx.fillStyle = this.getColor(dstyle.dstyle.fontColor, (item.disabled || !item.inCurrentMonth) ? 0.7 : 1);
 				ctx.font = this._fontSize
 				const textHeight = 34;
-				const _t_x = _realCellWidth * col + _realCellWidth/2
-				let _t_y = this.cellHeight * i + this.cellHeight / 2+2;
+				const _t_x = _realCellWidth * col + _realCellWidth / 2
+				let _t_y = this.cellHeight * i + this.cellHeight / 2 + 2;
 				// #ifdef APP-IOS
-				_t_y = this.cellHeight * i + this.cellHeight / 2+6;
+				_t_y = this.cellHeight * i + this.cellHeight / 2 + 6;
 				// #endif
 				ctx.fillText(text, _t_x, _t_y);
 				let label = this.showLabel(item)
-				label = label==''?dstyle.dstyle.label:label
-				
-				
+				label = label == '' ? dstyle.dstyle.label : label
+
+
 				// 绘制底部的label
 				if (label != '') {
 					let labely = this.cellHeight * i + this.cellHeight - 9;
@@ -109,19 +155,31 @@ export class calendarDraw {
 					ctx.fillText(label, _t_x, labely);
 				}
 				
+				// 绘制状态小点点。
+				let statusColor = this.checkDataIsInDateStatus(item.date.date);
+				if(statusColor!=''){
+					ctx.fillStyle = statusColor
+					ctx.beginPath()
+					let statusY = this.cellHeight * i + this.cellHeight - this.sapce - 3;
+					ctx.arc(_t_x,statusY,2,0,Math.PI*2)
+					ctx.closePath()
+					ctx.fill()
+				}
+
 			}
 		}
 		ctx.update()
 	}
-	draw(list:xDateArrayItemType[][],modelv:xCalendarMode = 'day'){
+	draw(list : xDateArrayItemType[][], modelv : xCalendarMode = 'day',status:xCalendarDateStyleStatusType[]|null = null) {
 		let _this = this;
 		_this.model = modelv;
+		_this._dateStatus = status;
 		this.ele?.getBoundingClientRectAsync()
-		?.then((rect:DOMRect)=>{
-			_this._draw(_this.ele!,rect,list)
-		})
-		.catch((er)=>{
-			console.error(er)
-		})
+			?.then((rect : DOMRect) => {
+				_this._draw(_this.ele!, rect, list)
+			})
+			.catch((er) => {
+				console.error(er)
+			})
 	}
 }

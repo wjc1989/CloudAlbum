@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { PropType } from "vue"
 	import { getUid } from "../../core/util/xCoreUtil.uts"
-	import { getDefaultColor } from "../../core/util/xCoreColorUtil.uts"
 	import { checkIsCssUnit, rpx2px,getUnit } from "../../core/util/xCoreUtil.uts"
 	import { xConfig } from "../../config/xConfig.uts"
 	// import pickerItem from './picker-item.uvue'
-	import { PICKER_ITEM_INFO,X_PICKER_X_ITEM } from "../../interface.uts"
-	import { findNodeById, findParentNode } from "../x-picker-view/util.uts"
+	import { X_PICKER_X_ITEM } from "../../interface.uts"
 	
 	/**
 	 * @name 选择容器子节点 xPickerViewItem
@@ -130,15 +128,12 @@
 			_cellUnits() : string[] {
 				return this.cellUnits as string[]
 			},
-			dataList() : X_PICKER_X_ITEM[] {
-				return this.list.slice(0)
-			},
 			_list(): X_PICKER_X_ITEM[] {
-				return this.list.slice(0)
+				return this.list
 			},
 			_nowChildren(): X_PICKER_X_ITEM[] {
+				if(this._list.length==0) return [] as X_PICKER_X_ITEM[]
 				let index = Math.max(0,Math.min(this.nowCurrentIndex[0],this._list.length-1))
-				if(this._list.length==0&&index>this._list.length-1) return [] as X_PICKER_X_ITEM[]
 				let item = this._list[index];
 				
 				return item.children
@@ -159,7 +154,7 @@
 				let t = this;
 				t.setNowCurrentIndex(true)
 			},
-			selectedIndex(newvaluse : string[]) {
+			selectedIndex(newvaluse : number[]) {
 				let t = this;
 				t.setNowCurrentIndex(false)
 			}
@@ -237,12 +232,25 @@
 				let index = indexs[0]
 				index = Math.max(0,Math.min(index,this._list.length-1))
 				let item = this._list[index]
-				
 				if (item.disabled) {
-					index = this.nowCurrentIndex[0] > index ? index + 1 : index - 1;
-					index = Math.max(this._list.length, index)
-					index = Math.min(0, index)
-					indexs = [index]
+					// 寻找最近的未禁用项
+					let left = index - 1
+					let right = index + 1
+					let found = -1
+					while (left >= 0 || right < this._list.length) {
+						if (left >= 0 && !this._list[left].disabled) { found = left; break }
+						if (right < this._list.length && !this._list[right].disabled) { found = right; break }
+						left -= 1
+						right += 1
+					}
+					if (found >= 0) {
+						index = found
+						indexs = [index]
+					} else {
+						// 全部禁用，回退到0
+						index = 0
+						indexs = [0]
+					}
 				}
 				this.nowCurrentIndex = indexs;
 				

@@ -136,7 +136,7 @@
 				default: "day"
 			},
 			/**
-			 * 输出时间格式，只对v-model:modelStr及输入框展示有效
+			 * 输出时间格式，只对v-model:modelStr及输入框展示有效YYYY-MM-DD，为空时由当前语文决定
 			 * 因此它可能不是一个标准时间，比如YY SS ,所以不能作为modelValue使用
 			 * 有效格式：
 			 * YYYY年
@@ -148,7 +148,7 @@
 			 */
 			format: {
 				type: String,
-				default: "YYYY-MM-DD"
+				default: ""
 			},
 			/**
 			 * 上方的单位名称
@@ -240,13 +240,18 @@
 				// '开始时间'
 				if (this.nowValue[0] == '') return xConfig.i18n.t("tmui4x.betweentTime.start")
 				// const date = (new xDate(this.nowValue[0])).format(this.format);
-				
+				if(this.format!=''){
+					return (new xDate(this.nowValue[0])).format(this.format);
+				}
 				return xConfig.i18n.d(this.nowValue[0],null,{year:"numeric",month:"numeric",day:"numeric"} as DateTimeFormatOrNull)
 			},
 			_end_date_str_format() : string {
 				// '结束时间'
 				if (this.nowValue[1] == '') return xConfig.i18n.t("tmui4x.betweentTime.end")
 				// (new xDate(this.nowValue[1])).format(this.format) 
+				if(this.format!=''){
+					return (new xDate(this.nowValue[1])).format(this.format) 
+				}
 				return xConfig.i18n.d(this.nowValue[1],null,{year:"numeric",month:"numeric",day:"numeric"} as DateTimeFormatOrNull)
 			},
 			_backgroundColor() : string {
@@ -388,12 +393,16 @@
 
 				if (this.changeIndex == 0) {
 					if (strStart == '') {
-						strStart = strEnd != '' ? strEnd : (this.endDate.format())
+						// strStart = strEnd != '' ? strEnd : (this.endDate.format())
+						let tempStart = new xDate().getBetweenDate(this._start_date_str,this._end_date_str,'max')
+						strStart = new xDate(tempStart).format()
 						this.nowValue = [strStart, strEnd]
 					}
 				} else if (this.changeIndex == 1) {
 					if (strEnd == '') {
-						strEnd = strStart != '' ? strStart : (this.endDate.format())
+						// strEnd = strStart != '' ? strStart : (this.endDate.format())
+						let tempEnd = new xDate().getBetweenDate(this._start_date_str,this._end_date_str,'max')
+						strEnd = new xDate(tempEnd).format()
 						this.nowValue = [strStart, strEnd]
 					}
 				}
@@ -405,30 +414,37 @@
 				let typelist = [] as coverValueType[];
 				let list:Array<any> = this.quickDate;
 				if (list.length == 0) return typelist;
-				
+				let _date = new xDate()
+				let startFDate = "YYYY/MM/DD 00:00:00"
+				let endFDate = "YYYY/MM/DD 23:59:59"
+				let _start = new xDate(new xDate().getBetweenDate(this._start_date_str,this._end_date_str,'min')).format(startFDate)
+				let _end = new xDate(new xDate().getBetweenDate(this._start_date_str,this._end_date_str,'max')).format(endFDate)
+				_date = new xDate(_start)
 				for (let i = 0; i < list.length; i++) {
 					let item : any = list[i];
-				
+					
 					if(typeof item == 'string'){
 						if(item.substring(0,1)=='p'){
 							let dshi = parseInt(item.substring(1))! as number
-							let date = new xDate()
-							let start = date.format()
+							let date = _date.getClone()
+							let start = _start
 							date.subtraction(dshi, 'y')
+							date = new xDate(date.getBetweenDate(this._start_date_str,this._end_date_str,'min'))
 							let end = date.format()
 							// '前' + dshi + '年'
 							typelist.push({ value: [end, start], str: xConfig.i18n.t("tmui4x.betweentTime.quiakListTitle3",dshi) } as coverValueType)
 						}else if (!isNaN(parseInt(item))) {
 							let dshi = parseInt(item)! as number;
-							let date = new xDate()
-							let start = date.format()
+							let date = _date.getClone()
+							let start = _start
 							date.subtraction(dshi, 'd')
+							date = new xDate(date.getBetweenDate(this._start_date_str,this._end_date_str,'min'))
 							let end = date.format()
 							// '最近' + item + '天'
 							typelist.push({ value: [end, start], str: xConfig.i18n.t("tmui4x.betweentTime.quiakListTitle2",dshi) } as coverValueType)
 						} else {
 							let dshi = 0;
-							let date = new xDate()
+							let date = new xDate(_end)
 							let startFDate = "YYYY/MM/DD 00:00:00"
 							let endFDate = "YYYY/MM/DD 23:59:59"
 							let start = date.format(startFDate)
@@ -439,20 +455,28 @@
 							if (item == 'w') {
 								start = date.getDateStartOf('w').format(startFDate)
 								end = date.getDateEndOf('w').format(endFDate)
+								start = new xDate(new xDate(start).getBetweenDate(this._start_date_str,this._end_date_str,'min')).format(startFDate)
+								end = new xDate(new xDate(end).getBetweenDate(this._start_date_str,this._end_date_str,'max')).format(endFDate)
 								desc = xConfig.i18n.t("tmui4x.betweentTime.quiakListTitle",1);//"本周"
 							} else if (item == 'm') {
 								start = date.getDateStartOf('m').format(startFDate)
 								end = date.getDateEndOf('m').format(endFDate)
+								start = new xDate(new xDate(start).getBetweenDate(this._start_date_str,this._end_date_str,'min')).format(startFDate)
+								end = new xDate(new xDate(end).getBetweenDate(this._start_date_str,this._end_date_str,'max')).format(endFDate)
 								desc = xConfig.i18n.t("tmui4x.betweentTime.quiakListTitle",2);//"本月"
 							} else if (item == 'y') {
 								start = date.getDateStartOf('y').format(startFDate)
 								end = date.getDateEndOf('y').format(endFDate)
+								start = new xDate(new xDate(start).getBetweenDate(this._start_date_str,this._end_date_str,'min')).format(startFDate)
+								end = new xDate(new xDate(end).getBetweenDate(this._start_date_str,this._end_date_str,'max')).format(endFDate)
 								desc = xConfig.i18n.t("tmui4x.betweentTime.quiakListTitle",3);//"本年"
 							} else if (item == 'q') {
 								let nowq = date.getQuarter('')
 								let itemqatar = nowq[0]
 								start = itemqatar.start
 								end = itemqatar.end
+								start = new xDate(new xDate(start).getBetweenDate(this._start_date_str,this._end_date_str,'min')).format(startFDate)
+								end = new xDate(new xDate(end).getBetweenDate(this._start_date_str,this._end_date_str,'max')).format(endFDate)
 								desc = xConfig.i18n.t("tmui4x.betweentTime.quiakListTitle",4);//"本季度"
 							}
 										
@@ -460,9 +484,10 @@
 						}
 					}else if(typeof item == 'number'){
 						let dshi = item as number;
-						let date = new xDate()
-						let start = date.format()
+						let date = _date.getClone()
+						let start = _start
 						date.subtraction(dshi, 'd')
+						date = new xDate(date.getBetweenDate(this._start_date_str,this._end_date_str,'min'))
 						let end = date.format()
 						// '最近' + item + '天'
 						typelist.push({ value: [end, start], str: xConfig.i18n.t("tmui4x.betweentTime.quiakListTitle2",dshi) } as coverValueType)

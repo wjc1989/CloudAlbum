@@ -45,6 +45,7 @@
 				
 				isOpenedDefault:false,
 				isLoading:false,
+				anitid:23,
 				// #ifdef H5
 				targetToPage:"uni-app",
 				// #endif
@@ -460,7 +461,7 @@
 				return this.cancelText
 			},
 			_confirmText() : string {
-				if(this.cancelText==''){
+				if(this.confirmText==''){
 					return this!.i18n.t("tmui4x.confirm")
 				}
 				return this.confirmText
@@ -599,6 +600,10 @@
 				 */
 				this.$emit('beforeClose')
 				this.setStyleAni();
+				let t =this;
+				this.anitid = setTimeout(function() {
+					t.onEnd()
+				}, this._duration);
 			},
 			showAlert() {
 
@@ -613,6 +618,10 @@
 				 */
 				this.$emit('beforeOpen')
 				this.setStyleAni();
+				let t =this;
+				this.anitid = setTimeout(function() {
+					t.onEnd()
+				}, this._duration+60);
 
 
 			},
@@ -812,7 +821,8 @@
 					 -->
 					<slot name="contentTop"></slot>
 				</view>
-				<view @transitionend="onEnd" @click.stop="" ref="xDrawerWrapContent" class="xDrawerWrapContent"
+				<!-- @transitionend="onEnd"  -->
+				<view @click.stop="" ref="xDrawerWrapContent" class="xDrawerWrapContent"
 					@touchstart="mStart" @touchmove="mMove" @touchend="mEnd" :class="[
 					(_position=='top'||_position=='bottom')&&_widthCoverCenter?'xDrawerWrapContentMinwidth':'',
 					'xDrawerWrapContent_'+_position

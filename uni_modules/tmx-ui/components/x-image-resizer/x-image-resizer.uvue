@@ -1,10 +1,9 @@
 <template>
-	<view class="xImageResizer" @touchstart="conStart" @touchmove="conMove" @touchend="conEnd"
-	<!-- #ifdef WEB -->
-	@mousedown="conStartByweb"
-	@mousewheel="conwheelByweb"
-	<!-- #endif -->
-	>
+	<view class="xImageResizer" @touchstart="conStart" @touchmove="conMove" @touchend="conEnd" <!-- #ifdef WEB -->
+		@mousedown="conStartByweb"
+		@mousewheel="conwheelByweb"
+		<!-- #endif -->
+		>
 
 		<image v-if="isLoadImg" :style="{
 			 width:imginfoNow.width+'px',
@@ -34,33 +33,31 @@
 				<view :style="{opacity:jiaoIsMoving?'1':'0'}" class="xImageResizerLine4 xImageResizerLine"></view>
 			</view>
 			<!-- 左上 -->
-			<view 
-				
-				@touchstart="jiaoMstart(($event as UniTouchEvent),0)"
-				@touchmove="jiaoMmove(($event as UniTouchEvent),0)" 
-				@touchend="jiaoMend(($event as UniTouchEvent),0)"
-				
+			<view @touchstart="jiaoMstart(($event as UniTouchEvent),0)"
+				@touchmove="jiaoMmove(($event as UniTouchEvent),0)" @touchend="jiaoMend(($event as UniTouchEvent),0)"
 				<!-- #ifdef WEB -->
 				@mousedown="jiaoMstartByweb(($event as UniMouseEvent),0)"
 				<!-- #endif -->
 				class="xImageRItem xImageRItem_lefttop"
-				></view>
+				>
+			</view>
 			<!-- 右上 -->
 			<view @touchstart="jiaoMstart(($event as UniTouchEvent),1)"
 				@touchmove="jiaoMmove(($event as UniTouchEvent),1)" @touchend="jiaoMend(($event as UniTouchEvent),1)"
-				
 				<!-- #ifdef WEB -->
 				@mousedown="jiaoMstartByweb(($event as UniMouseEvent),1)"
 				<!-- #endif -->
-				
-				class="xImageRItem xImageRItem_righttop"></view>
+
+				class="xImageRItem xImageRItem_righttop">
+			</view>
 			<!-- 右下 -->
 			<view @touchstart="jiaoMstart(($event as UniTouchEvent),2)"
 				@touchmove="jiaoMmove(($event as UniTouchEvent),2)" @touchend="jiaoMend(($event as UniTouchEvent),2)"
 				<!-- #ifdef WEB -->
 				@mousedown="jiaoMstartByweb(($event as UniMouseEvent),2)"
 				<!-- #endif -->
-				class="xImageRItem xImageRItem_bottomright"></view>
+				class="xImageRItem xImageRItem_bottomright">
+			</view>
 			<!-- 左下 -->
 			<view @touchstart="jiaoMstart(($event as UniTouchEvent),3)"
 				@touchmove="jiaoMmove(($event as UniTouchEvent),3)" @touchend="jiaoMend(($event as UniTouchEvent),3)"
@@ -74,10 +71,7 @@
 
 
 		<!-- canvas裁剪. -->
-		<canvas 
-		v-if="showCanvas" 
-		:key="canvasIdKey"
-		:style="{
+		<canvas v-if="showCanvas" :key="canvasIdKey" :style="{
 			width:maskSize.width+'px',
 			height:maskSize.height+'px',
 			top:maskSize.top+'px',
@@ -85,18 +79,14 @@
 		}" :id="canvasUid" ref="xImageResizerViewCanvas" class="xImageResizerViewCanvas"></canvas>
 		<view class="xImageResizerViewFooter">
 			<view class="xImageResizerCell">
-				<view style="display: flex;flex-direction: row;" >
-					<view 
-					@touchend.stop="toogleDir('h')" 
-					@click.stop="toogleDirByweb('h')"
-					>
-						<x-icon font-size="24" color="white" :name="horizontal==-1?'flip-horizontal-2-fill':'flip-horizontal-2-line'"></x-icon>
+				<view style="display: flex;flex-direction: row;">
+					<view @touchend.stop="toogleDir('h')" @click.stop="toogleDirByweb('h')">
+						<x-icon font-size="24" color="white"
+							:name="horizontal==-1?'flip-horizontal-2-fill':'flip-horizontal-2-line'"></x-icon>
 					</view>
-					<view 
-					@touchend.stop="toogleDir('v')"  
-					@click.stop="toogleDirByweb('v')"
-					>
-						<x-icon style="margin:0 16px" font-size="24" color="white" :name="vertical==-1?'flip-vertical-2-fill':'flip-vertical-2-line'"></x-icon>
+					<view @touchend.stop="toogleDir('v')" @click.stop="toogleDirByweb('v')">
+						<x-icon style="margin:0 16px" font-size="24" color="white"
+							:name="vertical==-1?'flip-vertical-2-fill':'flip-vertical-2-line'"></x-icon>
 					</view>
 				</view>
 				<view @touchend.stop="reset" @click.stop="reset">
@@ -104,16 +94,10 @@
 				</view>
 			</view>
 			<view class="xImageResizerCell">
-				<view 
-				@touchend.stop="cancel" 
-				@click.stop="cancelByweb"
-				>
+				<view @touchend.stop="cancel" @click.stop="cancelByweb">
 					<x-text color="white">{{i18n.t('tmui4x.imageResize.cancel')}}</x-text>
 				</view>
-				<view 
-				@touchend.stop="confirm" 
-				@click.stop="confirmByweb"
-				>
+				<view @touchend.stop="confirm" @click.stop="confirmByweb">
 					<x-text color="white">{{i18n.t('tmui4x.imageResize.ok')}}</x-text>
 				</view>
 			</view>
@@ -124,8 +108,8 @@
 <script setup lang="ts">
 	import { xConfig } from "../../config/xConfig.uts"
 	import { ref, Ref, reactive } from "vue";
-	import { xSIZE, xPOINT, xImageInfo, xSIZEiMage, translateScalePosition, alignImageToFrame, calculatePinchZoom, xCalculatePinchZoomOpts,maskRatioScaleToPhotoSizePosition } from "./resizemtx";
-	import {toPngFile} from "@/uni_modules/x-base642file-s"
+	import { xSIZE, xPOINT, xImageInfo, xSIZEiMage, translateScalePosition, alignImageToFrame, calculatePinchZoom, xCalculatePinchZoomOpts, maskRatioScaleToPhotoSizePosition } from "./resizemtx";
+	import { toPngFile } from "@/uni_modules/x-base642file-s"
 	const i18n = xConfig.i18n;
 	/**
 	 * @name 图片裁剪 xImageResizer
@@ -146,11 +130,11 @@
 		 * web返回的是Bolb文件对象
 		 * 微信返回的是base64图片数据
 		 */
-		(e : 'confirm',filepath:any):void,
+		(e : 'confirm', filepath : any) : void,
 		/**
 		 * 取消裁剪时触
 		 */
-		(e : 'cancel'):void,
+		(e : 'cancel') : void,
 	}>()
 	const props = defineProps({
 		/**
@@ -170,20 +154,20 @@
 		/**
 		 * 压缩质量0-1
 		 */
-		compress:{
-			type:Number,
-			default:1
+		compress: {
+			type: Number,
+			default: 1
 		},
 		/**
 		 * 待裁剪的图片，任意地址，网络（web要注意跨域），本地地址，相对地址均可。
 		 */
-		src:{
-			type:String,
-			default:'http://gips1.baidu.com/it/u=1971954603,2916157720&fm=3028&app=3028&f=JPEG&fmt=auto?w=1920&h=2560'
+		src: {
+			type: String,
+			default: 'http://gips1.baidu.com/it/u=1971954603,2916157720&fm=3028&app=3028&f=JPEG&fmt=auto?w=1920&h=2560'
 		}
 	})
 	// @ts-igonre
-	const _src = computed(():string=>props.src)
+	const _src = computed(() : string => props.src)
 	const proxy = getCurrentInstance()?.proxy
 	const jiaoIsMoving = ref(false)
 	const isLoadImg = ref(false)
@@ -191,7 +175,7 @@
 	const isMouseWheeling = ref(false)
 	const touchlen = ref<any>({})
 	const firstInit = ref(true)
-	const canvasUid = 'xImage_'+(Math.random().toString(16).substring(2,8))
+	const canvasUid = 'xImage_' + (Math.random().toString(16).substring(2, 8))
 	let nowMoveJiaoIndex = 0
 	const backmaskSize = {
 		width: 200,
@@ -281,51 +265,51 @@
 			}
 		})
 	}
-	const toogleDir = (type:string)=>{
+	const toogleDir = (type : string) => {
 		// #ifdef WEB
 		let isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(window.navigator.userAgent)
-		if(!isMobile) return;
+		if (!isMobile) return;
 		// #endif
-		
-		if(type=='h'){
-			horizontal.value =horizontal.value ==-1?1:-1
-		}else{
-			vertical.value =vertical.value ==-1?1:-1
+
+		if (type == 'h') {
+			horizontal.value = horizontal.value == -1 ? 1 : -1
+		} else {
+			vertical.value = vertical.value == -1 ? 1 : -1
 		}
 	}
-	const toogleDirByweb = (type:string)=>{
-		
+	const toogleDirByweb = (type : string) => {
+
 		// #ifdef WEB
 		let isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(window.navigator.userAgent)
-		if(isMobile) return;
-		if(type=='h'){
-			horizontal.value =horizontal.value ==-1?1:-1
-		}else{
-			vertical.value =vertical.value ==-1?1:-1
+		if (isMobile) return;
+		if (type == 'h') {
+			horizontal.value = horizontal.value == -1 ? 1 : -1
+		} else {
+			vertical.value = vertical.value == -1 ? 1 : -1
 		}
 		// #endif
 	}
-	const jiao_start = (x:number,y:number,index:number)=>{
+	const jiao_start = (x : number, y : number, index : number) => {
 		nowPoniter.x = x
 		nowPoniter.y = y
 		nowOriPoniter.x = x
 		nowOriPoniter.y = y
 	}
-	
-	const jiao_move= (x:number,y:number,index:number)=>{
+
+	const jiao_move = (x : number, y : number, index : number) => {
 		let diffx = x - nowPoniter.x
 		let diffy = y - nowPoniter.y
-		let minHeight = barMinSize / (backmaskSize.width/backmaskSize.height)
-		let maxleft = (parent.width - backmaskSize.width)/2
-		let maxright = (parent.width - backmaskSize.width)/2 + backmaskSize.width - barMinSize
-		let maxtop = (parent.height - backmaskSize.height)/2
-		let maxbottom = (parent.height - backmaskSize.height)/2 + backmaskSize.height - minHeight
+		let minHeight = barMinSize / (backmaskSize.width / backmaskSize.height)
+		let maxleft = (parent.width - backmaskSize.width) / 2
+		let maxright = (parent.width - backmaskSize.width) / 2 + backmaskSize.width - barMinSize
+		let maxtop = (parent.height - backmaskSize.height) / 2
+		let maxbottom = (parent.height - backmaskSize.height) / 2 + backmaskSize.height - minHeight
 		if (index == 0) {
 			let difflen = diffy
 			if (Math.abs(diffx) > Math.abs(diffy)) {
 				difflen = diffx
 			}
-		
+
 			if (maskSize.width >= backmaskSize.width) {
 				difflen = Math.max(0, difflen)
 			}
@@ -335,48 +319,48 @@
 			if (maskSize.height <= barMinSize) {
 				difflen = Math.min(difflen, maskSize.height - minHeight)
 			}
-		
+
 			let width = maskSize.width - difflen
 			let height = maskSize.height - difflen
-		
+
 			width = Math.max(barMinSize, Math.min(width, backmaskSize.width))
 			height = Math.max(minHeight, Math.min(height, backmaskSize.height))
-		
-		
+
+
 			maskSize.width = width
 			maskSize.height = height
-			
-			maskSize.top = Math.max(Math.min(maskSize.top + difflen,maxbottom),maxtop)
-			maskSize.left = Math.max(Math.min(maskSize.left + difflen,maxright),maxleft)
+
+			maskSize.top = Math.max(Math.min(maskSize.top + difflen, maxbottom), maxtop)
+			maskSize.left = Math.max(Math.min(maskSize.left + difflen, maxright), maxleft)
 		}
 		if (index == 1) {
 			let difflen = diffy
 			// if(Math.abs(diffx)>Math.abs(diffy)){
 			// 	difflen = diffx
 			// }
-		
+
 			if (maskSize.width >= backmaskSize.width) {
 				difflen = Math.max(0, difflen)
 			}
-		
+
 			if (maskSize.width <= barMinSize) {
 				difflen = Math.min(difflen, maskSize.width - barMinSize)
 			}
 			if (maskSize.height <= barMinSize) {
 				difflen = Math.min(difflen, maskSize.height - minHeight)
 			}
-		
+
 			let width = maskSize.width - difflen
 			let height = maskSize.height - difflen
-		
+
 			width = Math.max(barMinSize, Math.min(width, backmaskSize.width))
 			height = Math.max(minHeight, Math.min(height, backmaskSize.height))
-		
-		
+
+
 			maskSize.width = width
 			maskSize.height = height
-		
-			maskSize.top = Math.max(Math.min(maskSize.top + difflen,maxbottom),maxtop)
+
+			maskSize.top = Math.max(Math.min(maskSize.top + difflen, maxbottom), maxtop)
 			// maskSize.left = maskSize.left - difflen
 		}
 		if (index == 2) {
@@ -384,14 +368,14 @@
 			if (Math.abs(diffx) > Math.abs(diffy)) {
 				difflen = diffx
 			}
-			
+
 			// if (maskSize.width <= barMinSize) {
 			// 	difflen = Math.max(difflen, barMinSize)
 			// }
 			// if (maskSize.height <= barMinSize) {
 			// 	difflen = Math.max(difflen, minHeight)
 			// }
-			
+
 			let width = maskSize.width + difflen
 			let height = maskSize.height + difflen
 			width = Math.max(barMinSize, Math.min(width, backmaskSize.width))
@@ -414,31 +398,31 @@
 			let height = maskSize.height - difflen
 			width = Math.max(barMinSize, Math.min(width, backmaskSize.width))
 			height = Math.max(minHeight, Math.min(height, backmaskSize.height))
-		
+
 			maskSize.width = width
 			maskSize.height = height
 			// maskSize.top = maskSize.top + difflen
-			
-			maskSize.left = Math.max(Math.min(maskSize.left + difflen,maxright),maxleft)
+
+			maskSize.left = Math.max(Math.min(maskSize.left + difflen, maxright), maxleft)
 		}
-		
+
 		nowPoniter.x = x
 		nowPoniter.y = y
 	}
-	
+
 	const jiaoMstart = (evt : UniTouchEvent, index : number) => {
 		evt.preventDefault()
 		evt.stopPropagation()
 		showCanvas.value = false;
 		if (evt.touches.length == 2) return;
 		jiaoIsMoving.value = true;
-		jiao_start(evt.changedTouches[0].clientX,evt.changedTouches[0].clientY,index)
+		jiao_start(evt.changedTouches[0].clientX, evt.changedTouches[0].clientY, index)
 	}
 	const jiaoMmove = (evt : UniTouchEvent, index : number) => {
 		evt.preventDefault()
 		evt.stopPropagation()
 		if (!jiaoIsMoving.value || evt.touches.length == 2) return;
-		jiao_move(evt.changedTouches[0].clientX,evt.changedTouches[0].clientY,index)
+		jiao_move(evt.changedTouches[0].clientX, evt.changedTouches[0].clientY, index)
 	}
 	const jiaoMend = (evt : UniTouchEvent, index : number) => {
 		evt.preventDefault()
@@ -456,9 +440,9 @@
 			return;
 		}
 		// setDefaultMaskPosition()
-		maskRatioScaleToPhotoSizePosition(backmaskSize,maskSize,imginfo,imginfoNow,index)
-		
-		setTimeout(function() {
+		maskRatioScaleToPhotoSizePosition(backmaskSize, maskSize, imginfo, imginfoNow, index)
+
+		setTimeout(function () {
 			jiaoIsMoving.value = false;
 		}, 40);
 	}
@@ -470,15 +454,15 @@
 		showCanvas.value = false;
 		jiaoIsMoving.value = true;
 		nowMoveJiaoIndex = index
-		jiao_start(evt.clientX,evt.clientY,index)
-		
+		jiao_start(evt.clientX, evt.clientY, index)
+
 	}
 	const jiao_moveByweb = (evt : UniMouseEvent, index : number) => {
 		evt.preventDefault()
 		evt.stopPropagation()
 		if (!jiaoIsMoving.value) return;
-		
-		jiao_move(evt.clientX,evt.clientY,nowMoveJiaoIndex)
+
+		jiao_move(evt.clientX, evt.clientY, nowMoveJiaoIndex)
 	}
 	const jiao_endByweb = (evt : UniMouseEvent, index : number) => {
 		evt.preventDefault()
@@ -489,50 +473,50 @@
 		}
 		let diffx = evt.clientX - nowOriPoniter.x
 		let diffy = evt.clientY - nowOriPoniter.y
-		
+
 		if (diffx == diffy && diffx == 0) {
 			jiaoIsMoving.value = false;
 			return;
 		}
 		// setDefaultMaskPosition()
-		
-		maskRatioScaleToPhotoSizePosition(backmaskSize,maskSize,imginfo,imginfoNow,nowMoveJiaoIndex)
-		setTimeout(function() {
+
+		maskRatioScaleToPhotoSizePosition(backmaskSize, maskSize, imginfo, imginfoNow, nowMoveJiaoIndex)
+		setTimeout(function () {
 			jiaoIsMoving.value = false;
 		}, 10);
 	}
-	
-	
-	document.body.addEventListener('mousemove',jiao_moveByweb)
-	document.body.addEventListener('mouseup',jiao_endByweb)
-	document.body.addEventListener('mouseleave',jiao_endByweb)
-	
+
+
+	document.body.addEventListener('mousemove', jiao_moveByweb)
+	document.body.addEventListener('mouseup', jiao_endByweb)
+	document.body.addEventListener('mouseleave', jiao_endByweb)
+
 	// #endif
 
-	const conStart_start = (x:number,y:number)=>{
+	const conStart_start = (x : number, y : number) => {
 		nowPoniter.x = x
 		nowPoniter.y = y
 		nowOriPoniter.x = x
 		nowOriPoniter.y = y
 	}
-	const conStart_move = (x:number,y:number)=>{
+	const conStart_move = (x : number, y : number) => {
 		let diffx = x - nowPoniter.x
 		let diffy = y - nowPoniter.y
-		
+
 		imginfoNow.top = diffy + imginfoNow.top
 		imginfoNow.left = diffx + imginfoNow.left
-		
+
 		nowPoniter.x = x
 		nowPoniter.y = y
 	}
-	const conStart_end = (x:number,y:number)=>{
+	const conStart_end = (x : number, y : number) => {
 		let diffx = x - nowOriPoniter.x
-		let diffy = y- nowOriPoniter.y
-		
+		let diffy = y - nowOriPoniter.y
+
 		if (diffx == diffy && diffx == 0) return;
-		
+
 		let resultAlign = alignImageToFrame(imginfoNow, maskSize)
-		
+
 		imginfoNow.left = resultAlign.left
 		imginfoNow.top = resultAlign.top
 	}
@@ -565,8 +549,8 @@
 
 			return;
 		}
-	
-		conStart_start(evt.changedTouches[0].clientX,evt.changedTouches[0].clientY)
+
+		conStart_start(evt.changedTouches[0].clientX, evt.changedTouches[0].clientY)
 	}
 	const conMove = (evt : UniTouchEvent) => {
 		if (!isMovingImg.value) return;
@@ -606,8 +590,8 @@
 		}
 
 
-		conStart_move(evt.changedTouches[0].clientX,evt.changedTouches[0].clientY)
-		
+		conStart_move(evt.changedTouches[0].clientX, evt.changedTouches[0].clientY)
+
 	}
 	const conEnd = (evt : UniTouchEvent) => {
 		if (!isMovingImg.value) return;
@@ -617,8 +601,8 @@
 
 		// 	return;
 		// }
-		conStart_end(evt.changedTouches[0].clientX,evt.changedTouches[0].clientY)
-		
+		conStart_end(evt.changedTouches[0].clientX, evt.changedTouches[0].clientY)
+
 		isMovingImg.value = false;
 	}
 
@@ -628,64 +612,64 @@
 		evt.stopPropagation()
 		showCanvas.value = false;
 		isMovingImg.value = true;
-		conStart_start(evt.clientX,evt.clientY)
-		
+		conStart_start(evt.clientX, evt.clientY)
+
 	}
 	const conMoveByweb = (evt : UniMouseEvent) => {
 		if (!isMovingImg.value) return;
 		evt.preventDefault()
 		evt.stopPropagation()
-		
-		conStart_move(evt.clientX,evt.clientY)
+
+		conStart_move(evt.clientX, evt.clientY)
 	}
 	const conEndByweb = (evt : UniMouseEvent) => {
 		if (!isMovingImg.value) return;
 		evt.preventDefault()
 		evt.stopPropagation()
 		// if (evt.touches.length == 2) {
-		
+
 		// 	return;
 		// }
-	
-		conStart_end(evt.clientX,evt.clientY)
+
+		conStart_end(evt.clientX, evt.clientY)
 		isMovingImg.value = false;
 	}
 	// 鼠标滚轮滑动缩放。
-	const conwheelByweb =  (evt:WheelEvent )=>{
+	const conwheelByweb = (evt : WheelEvent) => {
 		showCanvas.value = false;
 		isMouseWheeling.value = true;
 		let lv = 0.03;
 		let scale = imginfoNow.scale
-		if(evt.deltaY>0){
-			scale-=lv
-			
-		}else{
-			scale+=lv
+		if (evt.deltaY > 0) {
+			scale -= lv
+
+		} else {
+			scale += lv
 		}
-		scale = Math.max(backmaskSize.scale,Math.min(scale,3))
+		scale = Math.max(backmaskSize.scale, Math.min(scale, 3))
 		let width = imginfo.width * scale
 		let height = imginfo.height * scale
-		
-		imginfoNow.top = imginfoNow.top - (height - imginfoNow.height)/2
-		imginfoNow.left = imginfoNow.left - (width - imginfoNow.width)/2
+
+		imginfoNow.top = imginfoNow.top - (height - imginfoNow.height) / 2
+		imginfoNow.left = imginfoNow.left - (width - imginfoNow.width) / 2
 		imginfoNow.width = width
 		imginfoNow.height = height
-		
+
 		imginfoNow.scale = scale
-		conStart_end(evt.clientX,evt.clientY)
+		conStart_end(evt.clientX, evt.clientY)
 		clearTimeout(mousewheelTimeId.value)
-		mousewheelTimeId.value = setTimeout(function() {
+		mousewheelTimeId.value = setTimeout(function () {
 			isMouseWheeling.value = false;
 		}, 150);
-	
-		
+
+
 	}
-	
-	
-	document.body.addEventListener('mousemove',conMoveByweb)
-	document.body.addEventListener('mouseup',conEndByweb)
-	document.body.addEventListener('mouseleave',conEndByweb)
-	
+
+
+	document.body.addEventListener('mousemove', conMoveByweb)
+	document.body.addEventListener('mouseup', conEndByweb)
+	document.body.addEventListener('mouseleave', conEndByweb)
+
 	// #endif
 
 	const onInitResize = () => {
@@ -711,39 +695,39 @@
 		vertical.value = 1
 		onInitResize();
 	}
-	
-	const setCanvasPosition = ()=>{
-		if(proxy==null) return;
-		
-		function setdraw(canvas:UniCanvasElement,ctx:CanvasRenderingContext2D,conx:CanvasContext){
-			uni.showLoading({title:"...",mask:true})
+
+	const setCanvasPosition = () => {
+		if (proxy == null) return;
+
+		function setdraw(canvas : UniCanvasElement, ctx : CanvasRenderingContext2D, conx : CanvasContext) {
+			uni.showLoading({ title: "...", mask: true })
 			let dpr = uni.getWindowInfo().pixelRatio
 			canvas.width = canvas.offsetWidth * dpr
 			canvas.height = canvas.offsetHeight * dpr
 			let width = imginfo.width
 			let height = imginfo.height
-			
-			let loadimgs_on:Image|null = null;
+
+			let loadimgs_on : Image | null = null;
 			// #ifdef APP-ANDROID || APP-IOS ||WEB
-			loadimgs_on = new Image(width,height)
+			loadimgs_on = new Image(width, height)
 			// #endif
 			// #ifdef MP-WEIXIN || APP-HARMONY
 			loadimgs_on = conx.createImage()
 			// #endif
-			
+
 			let loadimgs = loadimgs_on!
 			loadimgs.src = _src.value
-			function draw(){
+			function draw() {
 				ctx.save();
 				let dx = (imginfoNow.left - maskSize.left) * dpr
 				let dy = (imginfoNow.top - maskSize.top) * dpr
 				ctx.scale(horizontal.value, vertical.value);
-				if(horizontal.value==-1){
-					dx = -dx -imginfoNow.width*dpr;
+				if (horizontal.value == -1) {
+					dx = -dx - imginfoNow.width * dpr;
 				}
-				if(vertical.value==-1){
-					ctx.translate(0,vertical.value*canvas.height)
-					dy = (maskSize.height*dpr-dy )- imginfoNow.height*dpr
+				if (vertical.value == -1) {
+					ctx.translate(0, vertical.value * canvas.height)
+					dy = (maskSize.height * dpr - dy) - imginfoNow.height * dpr
 				}
 				// #ifdef APP-IOS||WEB||MP
 				ctx.drawImage(
@@ -754,118 +738,123 @@
 					imginfo.height,
 					dx,
 					dy,
-					imginfoNow.width*dpr,
-					imginfoNow.height*dpr
+					imginfoNow.width * dpr,
+					imginfoNow.height * dpr
 				)
 				// #endif
 				// #ifdef APP-ANDROID || APP-HARMONY
-			
+
 				ctx.drawImage(
 					loadimgs,
 					dx,
 					dy,
-					imginfoNow.width*dpr,
-					imginfoNow.height*dpr
+					imginfoNow.width * dpr,
+					imginfoNow.height * dpr
 				)
 				// #endif
-				
-				
+
+
 				// #ifdef APP
 				let imageBase64 = canvas.toDataURL()
-				toPngFile(imageBase64).then((file:string)=>{
+				toPngFile(imageBase64).then((file : string) => {
 					uni.compressImage({
-						src:file,
-						quality:props.compress*100,
-						success(compressSuccess){
-							emits('confirm',compressSuccess.tempFilePath)
+						src: file,
+						quality: props.compress * 100,
+						success(compressSuccess) {
+							emits('confirm', compressSuccess.tempFilePath)
 						},
-						fail(){
-							emits('confirm',file)
+						fail() {
+							emits('confirm', file)
 						}
+					})
+				}).catch(() => {
+					uni.showToast({
+						title: "错误，请重试",
+						icon: "none"
 					})
 				})
 				// #endif
 				// #ifdef WEB
 				try {
-					let imageBase64 = canvas.toDataURL('image/jpeg',props.compress)
-					emits('confirm',imageBase64)
+					let imageBase64 = canvas.toDataURL('image/jpeg', props.compress)
+					emits('confirm', imageBase64)
 				} catch (error) {
 					//TODO handle the exception
 					console.error("图片跨域了.")
 				}
 				// #endif
 				// #ifdef MP-WEIXIN
-				let filBase64 = conx.toDataURL('image/jpeg',props.compress)
-				toPngFile(filBase64).then((file:string)=>{
-					emits('confirm',file)
+				let filBase64 = conx.toDataURL('image/jpeg', props.compress)
+				toPngFile(filBase64).then((file : string) => {
+					emits('confirm', file)
 				})
 				// #endif
-				
+
 				uni.hideLoading()
 				ctx.restore()
 			}
-			
-			loadimgs.onload = ()=>{
+
+			loadimgs.onload = () => {
 				draw()
 			}
-			
+
 		}
-		
-		
+
+
 		uni.createCanvasContextAsync({
-			id:canvasUid,
-			component:proxy,
-			success(context){
+			id: canvasUid,
+			component: proxy,
+			success(context) {
 				let ctx = context.getContext('2d')!;
 				let canvas = ctx.canvas
-				
-				setdraw(canvas,ctx,context)
+
+				setdraw(canvas, ctx, context)
 			},
-			fail(){
-				uni.showToast({title:'错误',icon:'none'})
+			fail() {
+				uni.showToast({ title: '错误', icon: 'none' })
 			}
 		})
 	}
-	const confirm = ()=>{
-		
+	const confirm = () => {
+
 		// #ifdef WEB
 		let isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(window.navigator.userAgent)
-		if(!isMobile) return;
+		if (!isMobile) return;
 		// #endif
-	
+
 		showCanvas.value = true;
-		canvasIdKey.value+=1
-		setTimeout(function() {
+		canvasIdKey.value += 1
+		setTimeout(function () {
 			setCanvasPosition()
 		}, 120);
-	
+
 	}
-	const confirmByweb = ()=>{
+	const confirmByweb = () => {
 		// #ifdef WEB
 		let isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(window.navigator.userAgent)
-		if(isMobile) return;
+		if (isMobile) return;
 		showCanvas.value = true;
 		setCanvasPosition()
 		// #endif
 	}
-	const cancel = ()=>{
+	const cancel = () => {
 		// #ifdef WEB
 		let isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(window.navigator.userAgent)
-		if(!isMobile) return;
+		if (!isMobile) return;
 		// #endif
-		
+
 		emits('cancel')
-		
+
 	}
-	const cancelByweb = ()=>{
+	const cancelByweb = () => {
 		// #ifdef WEB
 		let isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(window.navigator.userAgent)
-		if(isMobile) return;
+		if (isMobile) return;
 		emits('cancel')
 		// #endif
 	}
-	
-	watch(():string=>_src.value,()=>{
+
+	watch(() : string => _src.value, () => {
 		nextTick(() => {
 			onInitResize()
 		})
@@ -877,22 +866,22 @@
 		})
 		// #endif
 		// #ifdef APP-HARMONY
-		setTimeout(function() {
+		setTimeout(function () {
 			onInitResize()
 		}, 120);
 		// #endif
 	})
-	onBeforeUnmount(()=>{
+	onBeforeUnmount(() => {
 		// #ifdef WEB
-		document.body.removeEventListener('mousemove',jiao_moveByweb)
-		document.body.removeEventListener('mouseup',jiao_endByweb)
-		document.body.removeEventListener('mouseleave',jiao_endByweb)
-		
-		document.body.removeEventListener('mousemove',conMoveByweb)
-		document.body.removeEventListener('mouseup',conEndByweb)
-		document.body.removeEventListener('mouseleave',conEndByweb)
-		
-		
+		document.body.removeEventListener('mousemove', jiao_moveByweb)
+		document.body.removeEventListener('mouseup', jiao_endByweb)
+		document.body.removeEventListener('mouseleave', jiao_endByweb)
+
+		document.body.removeEventListener('mousemove', conMoveByweb)
+		document.body.removeEventListener('mouseup', conEndByweb)
+		document.body.removeEventListener('mouseleave', conEndByweb)
+
+
 		// #endif
 	})
 </script>
@@ -1019,11 +1008,13 @@
 		transition-duration: 0.3s;
 		transition-timing-function: linear;
 	}
+
 	/* #ifdef WEB */
-	.xImageRItem:hover{
+	.xImageRItem:hover {
 		cursor: move;
 		background-color: rgba(255, 255, 255, 0.5);
 	}
+
 	/* #endif */
 	.xImageResizerImage {
 		pointer-events: none;

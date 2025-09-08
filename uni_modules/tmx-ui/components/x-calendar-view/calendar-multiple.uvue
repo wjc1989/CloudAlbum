@@ -5,7 +5,7 @@ import { type PropType,getCurrentInstance } from "vue"
 	import { checkIsCssUnit } from "../../core/util/xCoreUtil.uts"
 	import { xConfig } from "../../config/xConfig.uts"
 	import { xDate, dateCovertXdate, xDateTypeTime } from "../../core/util/xDate.uts"
-	import { xDateDayInfoType, xCalendarDateStyle_type } from "../../interface.uts"
+	import { xDateDayInfoType, xCalendarDateStyle_type,xCalendarDateStyleStatusType } from "../../interface.uts"
 	import { xCalendar } from "./xCalendar"
 	import { xDateArrayItem,xDateArrayItemType,xCalendarArgs,xCalendarMode } from "../x-calendar-view/interface.uts"
 	const i18n = xConfig.i18n;
@@ -80,9 +80,15 @@ import { type PropType,getCurrentInstance } from "vue"
 		rangColor:string,
 		rangFontColor:string,
 		currentDate:string,
-		
+		/**
+		 * 你当前的一周的第一天的索引值是几：0: 周一，1: 周二，2: 周三，3: 周四，4: 周五，5: 周六，6: 周日
+		 */
+		seekDay:number,
+		/**
+		 * 给日期设定状态类型为：xCalendarDateStyleStatusProps
+		 */
+		dateStatus:xCalendarDateStyleStatusType[],
 	}
-	
 	
 	const emit = defineEmits(['change','click'])
 	const props = withDefaults(defineProps<xCalendarMultiplePropsType>(), {
@@ -100,6 +106,8 @@ import { type PropType,getCurrentInstance } from "vue"
 		activeFontColor:'#ffffff',
 		rangColor:'',
 		rangFontColor:'',
+		seekDay:0,
+		dateStatus:[] as xCalendarDateStyleStatusType[]
 	})
 	const calendar = new xCalendar()
 	const _rangColor = computed(()=>{
@@ -117,21 +125,27 @@ import { type PropType,getCurrentInstance } from "vue"
 		return result
 	}
 	const _fontSize = computed(():string=> checkIsCssUnit('16',''))
+	const _dateStatus = computed(() : xCalendarDateStyleStatusType[] => props.dateStatus)
 	const dateArrayList = computed(():xDateArrayItemType[][]=>{
 		const primaryColor = getDefaultColor(props.color==''?xConfig.color:props.color);
 		const dates = calendar.getCalendar(
-		props.model,
-		props.currentDate,
-		props.modelValue,
-		props.startDate!=''?new Date(props.startDate.replace(/-/g,'/')):null,
-		props.endDate!=''?new Date(props.endDate.replace(/-/g,'/')):null,
-		{
-			color:primaryColor,
-			fontColor:getDefaultColor(xConfig.dark=='dark'?props.fontDarkColor:props.fontColor),
-			activeFontColor:getDefaultColor(props.activeFontColor),
-			rangColor:_rangColor.value,
-			rangFontColor:props.rangFontColor==''?primaryColor:getDefaultColor(props.rangFontColor)
-		} as xCalendarArgs,props.dateStyle,props.disabledDays);
+			props.seekDay,
+			props.model,
+			props.currentDate,
+			props.modelValue,
+			props.startDate!=''?new Date(props.startDate.replace(/-/g,'/')):null,
+			props.endDate!=''?new Date(props.endDate.replace(/-/g,'/')):null,
+			{
+				color:primaryColor,
+				fontColor:getDefaultColor(xConfig.dark=='dark'?props.fontDarkColor:props.fontColor),
+				activeFontColor:getDefaultColor(props.activeFontColor),
+				rangColor:_rangColor.value,
+				rangFontColor:props.rangFontColor==''?primaryColor:getDefaultColor(props.rangFontColor)
+			} as xCalendarArgs,
+			props.dateStyle,
+			props.disabledDays
+			
+		);
 		
 		return splitArray<xDateArrayItemType>(dates,7)
 	})
@@ -146,11 +160,56 @@ import { type PropType,getCurrentInstance } from "vue"
 		if(!calendar.isInCurrentMonth(new Date(item.date.date),new Date(props.currentDate))) return;
 		emit('click',item)
 	}
+	
+	function checkDataIsInDateStatus(date:string|null):string{
+		if(date ==''||date == null) return '';
+		for(let k =0 ;k <_dateStatus.value.length;k++){
+			let itemStatus = _dateStatus.value[k]
+			let dates = itemStatus?.date??[];
+			let start = itemStatus?.between?.start??''
+			let end = itemStatus?.between?.end??''
+			let betweenColor = itemStatus?.between?.color??''
+			let notDates = itemStatus?.between?.notDate??[]
+			let nowDate = new xDate(date);
+			let isInBetweenDate = false;
+			if(start!=''&&end!=''){
+				let isBetween = nowDate.isBetween(new xDate(start),new xDate(end),'d','[]');
+				let isNotDate = false
+				for(let i=0;i<notDates.length;i++){
+					let item = notDates[i];
+					if(nowDate.isBetweenOf(new xDate(item),'=','d')){
+						isNotDate = true;
+						break;
+					}
+				}
+				isInBetweenDate = isBetween && !isNotDate
+			}
+			if(isInBetweenDate) return getDefaultColor(betweenColor==''?'primary':betweenColor)
+			
+			let selfColor = ''
+			for(let i=0;i<dates.length;i++){
+				let item = dates[i];
+				if(nowDate.isBetweenOf(new xDate(item.date),'=','d')){
+					selfColor = item.color==''?'primary':item.color
+					break;
+				}
+				
+			}
+			if(selfColor!=''){
+				return getDefaultColor(selfColor)
+			}
+			
+		}
+		
+		return ""
+	}
+	
+	
 	// #ifdef APP
 	
 	function draw():Promise<any>{
 		return new Promise(()=>{
-			calendarDom?.draw(dateArrayList.value,_model.value)
+			calendarDom?.draw(dateArrayList.value,_model.value,_dateStatus.value)
 		})
 	}
 	
@@ -179,7 +238,7 @@ import { type PropType,getCurrentInstance } from "vue"
 		})
 	}
 	
-	watch(():any => dateArrayList.value,()=>{
+	watch([():any => dateArrayList.value,():any => _dateStatus.value],()=>{
 		draw()
 	})
 	
@@ -236,6 +295,7 @@ import { type PropType,getCurrentInstance } from "vue"
 						color:item.style.dstyle.fontColor
 					}"
 					>{{showLabel(item)||item.style.dstyle.label}}</text>
+					<view class="xCalendarViewStatus" :style="{backgroundColor:checkDataIsInDateStatus(item.date.date)}" v-if="checkDataIsInDateStatus(item.date.date)!=''"></view>
 				</view>
 			</view>
 		</view>
@@ -243,6 +303,14 @@ import { type PropType,getCurrentInstance } from "vue"
 	</view>
 </template>
 <style scoped lang="scss">
+	.xCalendarViewStatus{
+		width:4px;
+		height:4px;
+		border-radius: 2px;
+		position: absolute;
+		bottom: 1px;
+		
+	}
 	// #ifdef APP
 	.xCalendarViewItem{
 		width:100%;

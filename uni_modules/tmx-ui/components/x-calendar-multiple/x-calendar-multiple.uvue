@@ -5,7 +5,7 @@
 	import { checkIsCssUnit } from "../../core/util/xCoreUtil.uts"
 	import { xConfig,getI18n } from "../../config/xConfig.uts"
 	import { xDate, dateCovertXdate, xDateTypeTime } from "../../core/util/xDate.uts"
-	import { xDateDayInfoType, xCalendarDateStyle_type } from "../../interface.uts"
+	import { xDateDayInfoType, xCalendarDateStyle_type,xCalendarDateStyleStatusType } from "../../interface.uts"
 	import { xCalendar } from "./xCalendar"
 	import calendarMultipleUvue from "./calendar-multiple.uvue"
 	import { xDateArrayItem, xDateArrayItemType, xCalendarArgs, xCalendarMode } from "../x-calendar-view/interface.uts"
@@ -102,7 +102,16 @@
 		 * 循环渲染时，是否只渲染当前面板（如果你在pad等10年前的低端机上渲染日历有压力请打开此值为true)
 		 * 关闭后可以提升滑动体验。
 		 */
-		renderOnly:boolean
+		renderOnly:boolean,
+		/**
+		 * 你当前的一周的第一天的索引值是几：0: 周一，1: 周二，2: 周三，3: 周四，4: 周五，5: 周六，6: 周日
+		 */
+		seekDay:number,
+		/**
+		 * 给日期设定状态
+		 * 类型为：xCalendarDateStyleStatusType[]
+		 */
+		dateStatus:xCalendarDateStyleStatusType[]
 	}
 	
 	/**
@@ -164,9 +173,35 @@
 		headStyle: '',
 		currentDate: '',
 		vertical:false,
-		renderOnly:true
+		renderOnly:true,
+		seekDay:0,
+		dateStatus:[] as xCalendarDateStyleStatusType[]
 	})
-	const weeksCn = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"] 
+	const _dateStatus = computed(() : xCalendarDateStyleStatusType[] => props.dateStatus)
+	const weeksCn = computed(() : string[] => {
+		// ["周一", "周二", "周三", "周四", "周五", "周六", "周日"] 
+		// 根据 seekDay 属性调整周名称的顺序
+		const weekNames = [
+			i18n!.t("tmui4x.calendar.week",0),
+			i18n!.t("tmui4x.calendar.week",1),
+			i18n!.t("tmui4x.calendar.week",2),
+			i18n!.t("tmui4x.calendar.week",3),
+			i18n!.t("tmui4x.calendar.week",4),
+			i18n!.t("tmui4x.calendar.week",5),
+			i18n!.t("tmui4x.calendar.week",6),
+		]
+		// 如果 seekDay 为 0（默认周一），直接返回原数组
+		if (props.seekDay == 0) {
+			return weekNames
+		}
+		// 根据 seekDay 重新排列数组
+		const result: string[] = []
+		for (let i = 0; i < 7; i++) {
+			const index = (i + props.seekDay) % 7
+			result.push(weekNames[index])
+		}
+		return result
+	})
 	
 	const _headBgColor = computed(() : string => getDefaultColor(props.headBgColor))
 	const _headFontColor = computed(() : string => {
@@ -452,8 +487,7 @@
 				</view>
 				<view class="xCalendarViewDataHeader">
 					<view class="xCalendarViewDataHeaderItem" v-for="(item,index) in 7" :key="item">
-						<!-- weekCn[index] -->
-						<x-text :color="_headFontColor" font-size="12">{{i18n.t('tmui4x.calendar.week',index)}}</x-text>
+						<x-text :color="_headFontColor" font-size="12">{{weeksCn[index]}}</x-text>
 					</view>
 				</view>
 			</view>
@@ -465,6 +499,8 @@
 					<view style="width:100%;height:100%;position: relative;">
 						<view class="xCalendarViewContentBox">
 							<calendar-multiple-uvue v-if="index == _currentDateSwipersIndex||!props.renderOnly" @click="dateClick" :currentDate="item"
+								:dateStatus="_dateStatus"
+								:seekDay="props.seekDay"
 								:modelValue="props.modelValue" :model="props.model" :multipleMax="props.multipleMax"
 								:disabledDays="props.disabledDays" :startDate="props.startDate" :endDate="props.endDate"
 								:dateStyle="props.dateStyle" :format="props.format" :color="props.color"

@@ -86,7 +86,7 @@ export const xConfig = reactive({
 	/** 输入框默认的亮系背景色方便统一设计稿 */
 	inputBgColor: '#f5f5f5',
 	/** 输入框默认的统一提示placeholderStyle方便统一设计稿 */
-	placeholderStyle: '#888888',
+	placeholderStyle: '',
 	borderDarkColor: '#1c1c1c',
 	
 	/** l输入框的圆角 */
@@ -180,7 +180,6 @@ export const xTabbarConfig = reactive({
  */
 export const setConfig = (configs:Tmui4xOptions|null)=>{
 	let localLang = uni.getStorageSync("language") as string|null;
-	console.log("localLang:",localLang)
 	if(configs != null && configs?.i18nOptions != null){
 		let opts = configs.i18nOptions;
 		xConfig.i18n = createI18n(opts)

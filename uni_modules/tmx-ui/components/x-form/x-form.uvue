@@ -16,6 +16,7 @@
 	}
 	type labelDirType = 'vertical' | 'horizontal'
 	type errorAlignType = 'left' | 'center'| 'right'
+	type flatFunCall = (obj: UTSJSONObject, prefix: string) => UTSJSONObject
 	/**
 	 * @name 表单 xForm
 	 * @description 从1.1.2开始允许xform可以嵌套view进行form-item布局了,但建议不要嵌套太深,影响性能.
@@ -128,6 +129,36 @@
 	provide('XFORMITEM_LABEL_FontSize',computed(():string=>props.labelFontSize))
 	provide('XFORMITEM_SHOWLABEL',computed(():boolean=>props.showLabel))
 	provide('XFORMITEM_ERROR_ALIGN',computed(():string=>props.errorAlign))
+	
+	/**
+	 * 将嵌套对象拍平为点分隔的键值对
+	 * @param obj 要拍平的对象
+	 * @param prefix 键前缀
+	 * @returns 拍平后的对象
+	 */
+	let flattenObject:flatFunCall|null = null; 
+	
+	flattenObject = (obj: UTSJSONObject, prefix: string): UTSJSONObject => {
+	    let flattened: UTSJSONObject = {}
+		const flatMap = obj.toMap()
+	    for (const aitem of flatMap) {
+			let item = aitem as Array<any|null>
+			let key = item[0]! as string;
+			let value = item[1];
+	        if (flatMap.has(key)) {
+	            const newKey = prefix!='' ? `${prefix}/${key}` : key
+	            if (value !== null && value instanceof UTSJSONObject ) {
+	                // 递归处理嵌套对象
+	                let fun = flattenObject!
+					flattened = {...flattened,...fun(value, newKey)}
+	            } else {
+					flattened.set(newKey,value)
+	            }
+	        }
+	    }
+	    return flattened
+	}
+	
 	function getNodeInfo() {
 		uni.createSelectorQuery().in(proxy)
 			.select(".xForm")
@@ -152,7 +183,8 @@
 		if (typeof newvals != 'object' || typeof olds != 'object') return;
 		let newval = JSON.parseObject(JSON.stringify(newvals)) as UTSJSONObject;
 		let old = JSON.parseObject(JSON.stringify(olds)) as UTSJSONObject;
-	
+		newval = flattenObject!(newval,'');
+		old = flattenObject!(old,'');
 		let fileds = [] as FORMITEM_R[]
 		for (let key in old) {
 			let val : any | null = newval.get(key)
@@ -187,7 +219,8 @@
 			formData: [] as FORM_SUBMIT_OBJECT[]
 		} as FORM_SUBMIT_RESULT
 		let modevalue = JSON.parseObject(JSON.stringify(_modelValue.value)) as UTSJSONObject;
-			
+		modevalue = flattenObject!(modevalue,'');
+		
 		for (let key in modevalue) {
 			if (keys.length == 0 || keys.includes(key)) {
 	

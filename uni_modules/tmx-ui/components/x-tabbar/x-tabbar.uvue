@@ -11,7 +11,7 @@
 
 	/**
 	 * @name 底部导航 xTabbar
-	 * @description 可定义凸起按钮。通过全局状态设置选中项，放于任何页面可自动选中。组件的镂空因平台而有兼容差异，sdk不支持相关api
+	 * @description 可定义凸起按钮。通过全局状态设置选中项，放于任何页面可自动选中。组件的镂空因平台而有兼容差异，微信sdk不支持相关api，因为在微信端请务必is-canvas-render设置为false
 	 * @page /pages/index/tabbar
 	 * @category 导航组件
 	 * @constant 平台兼容
@@ -60,6 +60,11 @@
 		 * @param {number} index - 当前选中的索引
 		 */
 		(e : 'click', index : number) : void,
+		/**
+		 * 项目被双击时触发。
+		 * @param {number} index - 当前选中的索引
+		 */
+		(e : 'doubleClick', index : number) : void,
 		/**
 		 * 切换项目时触发。
 		 * @param {number} index - 当前选中的索引
@@ -231,7 +236,7 @@
 		/**
 		 * 是否开启canvas渲染引擎，开启后，可以得到
 		 * 异形的镂空效果。比view渲染的更精致好看。开启后前面的firstRenderTimeout要注意阅读
-		 * 两种渲染版本请自行选择使用。
+		 * 两种渲染版本请自行选择使用。微信端不支持canvas渲染，有相关接口微信sdk没有对齐平台，因此一定要设置为false
 		 */
 		isCanvasRender:{
 			type:Boolean,
@@ -505,9 +510,34 @@
 			getQuqi()
 		})
 	}
-
-
-	const itemClick = (index : number) => {
+	const itemDbClick = (index:number) =>{
+		console.log('dbclick',1)
+	}
+	let dbClickId = 23
+	let dbClickTime = 0
+	const ontouchstart = (index:number) =>{
+	}
+	const ontouchend = (index:number) =>{
+		let time = Date.now()
+		let diff = time - dbClickTime;
+		if(diff>100&&diff<250){
+			emits('doubleClick',index)
+		}
+		dbClickTime = time;
+	}
+	const itemClick = (evt:UniPointerEvent,index : number) => {
+		
+		// #ifdef WEB
+		if(evt.type == 'click'&&evt.pointerType == 'mouse'){
+			let time = Date.now()
+			let diff = time - dbClickTime;
+			if(diff>100&&diff<250){
+				emits('doubleClick',index)
+			}
+			dbClickTime = time;
+		}
+		
+		// #endif
 		/**
 		 * 项目点击时触发.
 		 */
@@ -632,7 +662,11 @@
 			@prop {number} size - 凸起图标大小,单位px
 			 -->
 			<slot name="out" :active="_outIndex==_activeIndex" :size="tuqiHeight">
-				<view @click="itemClick(outIndex)" class="xTabbarTuqiItem"
+				<view 
+				
+				@touchstart="ontouchstart(outIndex)"
+				@touchend="ontouchend(outIndex)"
+				@click="itemClick($event as UniPointerEvent,outIndex)" class="xTabbarTuqiItem"
 					:style="{height:tuqiHeight+'px',width:tuqiHeight+'px',backgroundColor:_outBgColor}">
 					<x-icon :color="_outIconColor" :font-size="iconSize"
 						:name="_activeIndex==_outIndex?_nowOutItem.selectedIcon:_nowOutItem.icon"></x-icon>
@@ -646,9 +680,14 @@
 			<view ref="canvasIdsEle" v-if="_outIndex>-1" :style="[{height:(safeHeight+height)+'px'},_styleMap]"></view>
 			<view ref="canvasIdsEle" v-if="_outIndex==-1" :style="[{height:(height)+'px'},_styleMap]"></view>
 		</view>
+		
 		<view class="xTabbarBox" :style="{position:'absolute','background-color': 'transparent',zIndex:zIndex}">
 			<view class="xTabbarWrap">
-				<view @click="itemClick(index)" class="xTabbarItem" v-for="(item,index) in _list" :key="index"
+				<view 
+				@touchstart="ontouchstart(index)"
+				@touchend="ontouchend(index)"
+				@click="itemClick($event as UniPointerEvent,index)" 
+				class="xTabbarItem" v-for="(item,index) in _list" :key="index"
 					:style="{height:height+'px'}">
 					<!-- 
 					 @slot 子项目插槽，以便完全自定义化样式。

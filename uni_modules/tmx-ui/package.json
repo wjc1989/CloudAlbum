@@ -1,7 +1,7 @@
 {
   "id": "tmx-ui",
   "displayName": "TM-UI-4.0原生应用开发解决方案套装【官方赛事一等奖排名第一】",
-  "version": "1.1.16",
+  "version": "1.1.17",
   "description": "高质量uniappx UI组件库,原生Uts插件，原生组件基类,让开发原生级应用流畅性高度保持一致",
   "keywords": [
     "ios,uts,uvue,tmui4.0"
@@ -10,16 +10,16 @@
   "engines": {
     "HBuilderX": "^4.55",
     "uni-app": "",
-    "uni-app-x": "^4.74"
+    "uni-app-x": "^4.76"
   },
   "dcloudext": {
     "type": "component-uts",
     "sale": {
       "regular": {
-        "price": "549.00"
+        "price": "599.00"
       },
       "sourcecode": {
-        "price": "549.01"
+        "price": "599.01"
       }
     },
     "contact": {
@@ -80,28 +80,29 @@
         "uni-app-x": {
           "web": {
             "safari": {
-                "extVersion": "1.1.15",
-                "minVersion": ""
+                "extVersion": "",
+                "minVersion": "103"
             },
             "chrome": {
-                "extVersion": "1.1.15",
-                "minVersion": ""
+                "extVersion": "",
+                "minVersion": "103"
             }
           },
           "app": {
             "android": {
-                "extVersion": "1.1.15",
+                "extVersion": "",
                 "minVersion": "21"
             },
             "ios": {
-                "extVersion": "1.1.15",
-                "minVersion": ""
             },
-            "harmony": "x"
+            "harmony": {
+                "extVersion": "",
+                "minVersion": "12"
+            }
           },
           "mp": {
             "weixin": {
-                "extVersion": "1.1.15",
+                "extVersion": "",
                 "minVersion": "3.0.0"
             }
           }

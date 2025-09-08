@@ -107,7 +107,7 @@
 			
 		},
 		watch:{
-			disabled:()=>{
+			disabled(){
 				this.getNodes()
 			}
 		},
@@ -221,7 +221,7 @@
 		<!-- 
 		@slot 默认插槽 
 		 -->
-		<slot></slot>
+		<slot :order="orderIndex"></slot>
 	</view>
 </template>
 <style scoped>

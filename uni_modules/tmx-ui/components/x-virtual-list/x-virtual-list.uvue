@@ -1,11 +1,109 @@
 <template>
+	<!-- #ifdef APP -->
 	<view class="xVirtualList" ref="xVirtualList">
+		<view >
+			<!--
+			@slot sticky插槽
+			-->
+			<slot name="sticky"></slot>
+		</view>
 		<scroll-view
 			:show-scrollbar="false"
-			:refresher-enabled="_refresherEnabled"
+			type="nested"
+			style="flex:1"
+		>
+		
+			<nested-scroll-header>
+			    <view>
+					<!--
+					 @slot 顶部插槽，仅APP有效，它是nested-scroll-header协商节点，会自动与内容衔接在头上然后自动上往上推。
+					-->
+					<slot name="header"></slot>
+				</view>
+			</nested-scroll-header>
+			<nested-scroll-body>
+				<view style="flex:1">
+					<scroll-view 
+					:show-scrollbar="false"
+					@scroll="onScroll" 
+					:refresher-enabled="_refresherEnabled"
+					refresher-default-style="none"
+					:refresher-triggered="refresherTriggered"
+					:scroll-top="scrollTopTop"
+					@refresherpulling="refresherpulling"
+					@refresherrefresh="refresherrefresh"
+					@refresherrestore="refresherrestore"
+					@refresherabort="refresherabort"
+					@scrolltoupper="scrolltoupper"
+					@scrolltolower="scrolltolower"
+					style="flex:1" 
+					associative-container="nested-scroll-view"
+					>
+						
+						<!-- 自定义下拉刷新元素 -->
+						<!-- #ifndef APP-HARMONY -->
+						<view v-if="_refresherEnabled" @click="refreshOnload" slot="refresher" class="refresh-box" :style="{height:refreshHeight+'px'}">
+							<x-icon :color="refresState==2?'primary':''" v-if="refresState==0||refresState==1||refresState==2||refresState==3" :duration="800" :spin="refresState==2" name="loader-line" font-size="26"></x-icon>
+							<x-icon v-if="refresState==5" color="success" name="checkbox-circle-line" font-size="26"></x-icon>
+							<x-icon v-if="refresState==4" color="error" name="error-warning-fill" font-size="26"></x-icon>
+							<view class="tip-text"  >
+								<x-text font-size="16">{{refresStateMap.get(refresState)}}</x-text>
+							</view>
+						</view>
+						<!-- #endif -->
+						<!-- #ifdef APP-HARMONY -->
+						<view v-if="(refresState==5||refresState==4) && _refresherEnabled" @click="refreshOnload" class="refresh-box" :style="{height:refreshHeight+'px'}">
+							<x-icon v-if="refresState==5" color="success" name="checkbox-circle-line" font-size="26"></x-icon>
+							<x-icon v-if="refresState==4" color="error" name="error-warning-fill" font-size="26"></x-icon>
+							<view class="tip-text"  >
+								<x-text font-size="16">{{refresStateMap.get(refresState)}}</x-text>
+							</view>
+						</view>
+						<!-- #endif -->
+						
+						<!-- 虚拟占位容器，用于撑开滚动高度 -->
+						<view class="xVirtualListContainer" :style="{ height: totalHeight + 'px', paddingTop: offsetY + 'px' }">
+							<!--
+							 @slot 内容插槽你在这里渲染内容
+							 @prop {any[]} data - list数据
+							 @prop {number} startIndex - 数据切割的起始位置
+							 @prop {number} endIndex - 数据切割的结束位置
+							 -->
+							<slot name="default" :data="renderList" :startIndex="startIndex" :endIndex="endIndex"></slot>
+						</view>
+						<!-- 自定义下拉刷新元素 -->
+						<view @click="refreshBottomOnload" v-if="_refresherBottomEnabled&&refresBottomState!=0" class="refresh-box" :style="{height:refreshHeight+'px'}">
+							<x-icon color="primary" v-if="refresBottomState==1" :spin="true" name="loader-line" font-size="26"></x-icon>
+							<x-icon v-if="refresBottomState==2" color="error" name="error-warning-fill" font-size="26"></x-icon>
+							<view class="tip-text"  >
+								<x-text font-size="16">{{bottomRefresStateMap.get(refresBottomState)}}</x-text>
+							</view>
+						</view>
+						<!--
+						 @slot 底部插槽
+						 -->
+						<slot name="bottom"></slot>
+					</scroll-view>
+				</view>
+			</nested-scroll-body>
+		</scroll-view>
+	</view>
+	<!-- #endif -->
+	
+	<!-- #ifndef APP -->
+	<view class="xVirtualList" ref="xVirtualList">
+		<view >
+			<!--
+			@slot sticky插槽
+			-->
+			<slot name="sticky"></slot>
+		</view>
+		<scroll-view
+			:show-scrollbar="false"
+			type="nested"
 			@scroll="onScroll" 
 			class="xVirtualListScrollBody" 
-			direction="vertical"
+			:refresher-enabled="_refresherEnabled"
 			refresher-default-style="none"
 			:scroll-y="true"
 			:refresher-triggered="refresherTriggered"
@@ -18,8 +116,8 @@
 			@scrolltoupper="scrolltoupper"
 			@scrolltolower="scrolltolower"
 		>
+
 			<!-- 自定义下拉刷新元素 -->
-			<!-- #ifndef APP-HARMONY -->
 			<view @click="refreshOnload" slot="refresher" class="refresh-box" :style="{height:refreshHeight+'px'}">
 				<x-icon :color="refresState==2?'primary':''" v-if="refresState==0||refresState==1||refresState==2||refresState==3" :duration="800" :spin="refresState==2" name="loader-line" font-size="26"></x-icon>
 				<x-icon v-if="refresState==5" color="success" name="checkbox-circle-line" font-size="26"></x-icon>
@@ -28,18 +126,10 @@
 					<x-text font-size="16">{{refresStateMap.get(refresState)}}</x-text>
 				</view>
 			</view>
-			<!-- #endif -->
-			<!-- #ifdef APP-HARMONY -->
-			<view v-if="refresState==5||refresState==4" @click="refreshOnload" class="refresh-box" :style="{height:refreshHeight+'px'}">
-				<x-icon v-if="refresState==5" color="success" name="checkbox-circle-line" font-size="26"></x-icon>
-				<x-icon v-if="refresState==4" color="error" name="error-warning-fill" font-size="26"></x-icon>
-				<view class="tip-text"  >
-					<x-text font-size="16">{{refresStateMap.get(refresState)}}</x-text>
-				</view>
-			</view>
-			<!-- #endif -->
+
 			<!-- 虚拟占位容器，用于撑开滚动高度 -->
 			<view class="xVirtualListContainer" :style="{ height: totalHeight + 'px', paddingTop: offsetY + 'px' }">
+				
 				<!--
 				 @slot 内容插槽你在这里渲染内容
 				 @prop {any[]} data - list数据
@@ -60,8 +150,12 @@
 			 @slot 底部插槽
 			 -->
 			<slot name="bottom"></slot>
+			
 		</scroll-view>
 	</view>
+	
+	<!-- #endif -->
+
 </template>
 
 <script setup lang="ts">
@@ -101,7 +195,8 @@
 	 */
 	type Bounds = {
 		width: number,
-		height: number
+		height: number,
+		top:number,
 	}
 	
 	/**
@@ -144,6 +239,9 @@
 	
 	const proxy = getCurrentInstance()?.proxy;
 	const xVirtualList = ref<UniElement|null>(null)
+	const nestHeader = ref<UniElement|null>(null)
+	
+	
 	/**
 	 * 组件事件定义
 	 */
@@ -180,7 +278,7 @@
 	/** 滚动容器总高度 */
 	const scrollHeight = ref(0)
 	/** 容器的尺寸 */
-	const containerBounds = ref<Bounds>({ width: 0, height: 0 })
+	const containerBounds = ref<Bounds>({ width: 0, height: 0,top:0 })
 	/** 是否已初始化 */
 	const isInitialized = ref(false)
 	/** 防抖定时器 */
@@ -313,19 +411,38 @@
 	 */
 	function getContainerBounds(): Promise<void> {
 		return new Promise((resolve, reject) => {
-			
 			const ele = xVirtualList.value
 			if (ele == null) {
 				reject('容器元素不存在');
 				console.error('容器元素不存在')
 				return;
 			}
-			
 			ele.getBoundingClientRectAsync()?.then((rect: DOMRect) => {
 				containerBounds.value.width = rect.width;
 				containerBounds.value.height = rect.height;
+				containerBounds.value.top = rect.top;
 				isInitialized.value = true;
 				resolve();
+			}).catch((error) => {
+				console.error("容器读取宽高失败：", error);
+				reject(error);
+			});
+		});
+	}
+	
+	/**
+	 * 读取非APP子协商头的宽和高。
+	 */
+	function getNestHeaderBounds():Promise<DOMRect>{
+		return new Promise((resolve, reject) => {
+			const ele = nestHeader.value
+			if (ele == null) {
+				reject('子协商头不存在');
+				console.error('子协商头不存在')
+				return;
+			}
+			ele.getBoundingClientRectAsync()?.then((rect: DOMRect) => {
+				resolve(rect);
 			}).catch((error) => {
 				console.error("容器读取宽高失败：", error);
 				reject(error);
@@ -639,7 +756,8 @@
 	
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" >
+
 	.refresh-box{
 		display: flex;
 		flex-direction: row;

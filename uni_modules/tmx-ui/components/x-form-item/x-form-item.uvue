@@ -11,6 +11,7 @@
 	/**
 	 * @name 表单子组件 xFormItem
 	 * @description 从1.1.2开始允许非xform直接子节点了,也就是在xform可以嵌套view进行form-item布局了,但建议不要嵌套太深,影响性能.
+	 * 1.1.17开始支持嵌套对象字段，key必须/分割如'user/id'，sdk不支持以.分割符。
 	 * @page /pages/index/form
 	 * @category 表单组件
 	 * @constant 平台兼容

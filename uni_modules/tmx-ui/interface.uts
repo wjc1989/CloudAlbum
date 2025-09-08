@@ -535,6 +535,31 @@ export type xCalendarDateStyle_type = {
 	date : string
 }
 
+export type xCalendarDateStyleStatus = {
+	date:string,
+	color:string
+}
+
+export type xCalendarDateStyleBetweenStatus = {
+	/** 指定了start和end，那么处于这两个日期（含起始）之间的会显示状态点 */
+	start?:string,
+	/** 指定了start和end，那么处于这两个日期（含起始）之间的会显示状态点 */
+	end?:string,
+	/** start和end间条件达成时的状态颜色 */
+	color?:string,
+	/* 区间内排除的指定日期 */
+	notDate?:string[],
+}
+/**
+ * 状态结构对象
+ */
+export type xCalendarDateStyleStatusType = {
+	/** 启用日期区间设置连续性的状态,它与下面的参数不冲突，如果日期不在区间内，但又在指定的日期内，也会启用状态显示。 */
+	between?:xCalendarDateStyleBetweenStatus,
+	/** 指定单独的日期状态,高于between优先权 */
+	date?:xCalendarDateStyleStatus[]
+}
+
 export type xRequestMethond = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS"
 
 /**

@@ -85,7 +85,7 @@
 					"app": {
 						"android": "√",
 						"ios": "√",
-						"harmony": "-"
+						"harmony": "√"
 					},
 					"mp": {
 						"weixin": "√"

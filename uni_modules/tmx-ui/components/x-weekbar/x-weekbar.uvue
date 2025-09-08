@@ -1,11 +1,10 @@
 <script setup lang="ts">
-	
-	
-	import { computed, ref, onMounted,getCurrentInstance } from "vue"
+	import { computed, ref, onMounted,getCurrentInstance ,PropType} from "vue"
 	import { xDate } from "../../core/util/xDate.uts"
 	import { checkIsCssUnit,getUnit } from "../../core/util/xCoreUtil.uts"
 	import { getDefaultColor } from "../../core/util/xCoreColorUtil.uts"
 	import { xConfig } from "../../config/xConfig.uts"
+	import { xDateDayInfoType } from "../../interface"
 	const i18n = xConfig.i18n;
 	
 	/**
@@ -62,10 +61,18 @@
 		},
 		/**
 		 * 周上面显示的中文名称.'一', '二', '三', '四', '五', '六', '日'
+		 * 由于有属性seekDay的原因这里的顺序你不允许自己排列，你只能按照0-6的顺序来排列。即周一至周日，内部会自动再排列以满足seekDay的值。
 		 */
 		cn: {
 			type: Array as PropType<string[]>,
 			default: () : string[] => [] as string[]
+		},
+		/**
+		 * 你当前的一周的第一天的索引值是几：0: 周一，1: 周二，2: 周三，3: 周四，4: 周五，5: 周六，6: 周日
+		 */
+		seekDay:{
+			type: Number,
+			default: 0
 		},
 		/**
 		 * 背景
@@ -223,7 +230,8 @@
 	const _round = computed(() : string => checkIsCssUnit(props.round, xConfig.unit))
 	const _cn = computed(() : string[] => {
 		if(props.cn.length>0) return props.cn
-		return [
+		// 根据 seekDay 属性调整周名称的顺序
+		const weekNames = [
 			i18n!.t("tmui4x.weekbar.week",0),
 			i18n!.t("tmui4x.weekbar.week",1),
 			i18n!.t("tmui4x.weekbar.week",2),
@@ -232,6 +240,17 @@
 			i18n!.t("tmui4x.weekbar.week",5),
 			i18n!.t("tmui4x.weekbar.week",6),
 		]
+		// 如果 seekDay 为 0（默认周一），直接返回原数组
+		if (props.seekDay == 0) {
+			return weekNames
+		}
+		// 根据 seekDay 重新排列数组
+		const result: string[] = []
+		for (let i = 0; i < 7; i++) {
+			const index = (i + props.seekDay) % 7
+			result.push(weekNames[index])
+		}
+		return result
 	})
 	
 	
@@ -242,12 +261,34 @@
 	}
 	const setWeekDataToar = (dateParent:xDate,type:number):XWEEKBAR_LISTTYPE[]=>{
 		let date = dateParent.getClone().getDateStartOf('w')
+		
+		// 根据 seekDay 调整一周的起始日期
+		if (props.seekDay > 0) {
+			// 如果 seekDay 不是 0（周一），需要调整起始日期
+			// 向后偏移 seekDay 天
+			date.add(props.seekDay, 'd')
+		}
+
 		if(type<0){
 			date.subtraction(1, 'w')
 		}else if(type>0){
 			date.add(1, 'w')
 		}
-		let dates = date.getDaysOf('w')
+		
+		// 根据 seekDay 决定如何生成一周的日期
+		let dates: xDateDayInfoType[] = []
+		if (props.seekDay == 0) {
+			// 默认周一开始，使用原有的 getDaysOf('w')
+			dates = date.getDaysOf('w')
+		} else {
+			// 自定义周起始日，手动生成一周的日期
+			dates = []
+			for (let i = 0; i < 7; i++) {
+				let dayDate = date.getClone().add(i, 'd')
+				dates.push(dayDate.getDateInfo())
+			}
+		}
+		
 		let startdate = new xDate(props.startDate)
 		let enddate = new xDate(props.endDate)
 		let listdata : XWEEKBAR_LISTTYPE[] = []
@@ -271,6 +312,8 @@
 	
 	const getWeeksAr = ()=>{
 		let ars = [] as XWEEKBAR_LISTTYPE[][]
+		
+		// 根据 seekDay 属性调整周数据的生成
 		if(_nowIndex.value==0){
 			ars.push(setWeekDataToar(tempNowValue.value,0))
 			ars.push(setWeekDataToar(tempNowValue.value,1))
@@ -284,6 +327,7 @@
 			ars.push(setWeekDataToar(tempNowValue.value,-1))
 			ars.push(setWeekDataToar(tempNowValue.value,0))
 		}
+		
 		_weeksAr.value = [...ars]
 	}
 	
@@ -325,19 +369,26 @@
 	})
 
 	const dateClick = (date : XWEEKBAR_LISTTYPE) => {
+		if(date.disabled) return;
 		nowValue.value = date.xdate
 		tempNowValue.value = date.xdate
-		
 		emits('change', nowValue.value.format('YYYY-MM-DD'))
 		emits('update:modelValue', nowValue.value.format('YYYY-MM-DD'))
 		isClickDate.value = true;
 	}
 	const actionsClick = (type : string) => {
+		let startdate = new xDate(props.startDate)
+		let enddate = new xDate(props.endDate)
+		
 		if (type == 'right') {
+			let disabled = nowValue.value.isBetweenOf(enddate, '>=', 'd')
+			if(disabled) return;
 			let xd = nowValue.value.getClone().add(1, 'd')
 			nowValue.value = xd;
 			tempNowValue.value =xd
 		} else {
+			let disabled = nowValue.value.isBetweenOf(startdate, '<=', 'd')
+			if(disabled) return;
 			let xd = nowValue.value.getClone().subtraction(1, 'd')
 			nowValue.value = xd;
 			tempNowValue.value =xd
@@ -389,7 +440,7 @@
 				<swiper-item :style="{height:_wrapTotalHeight}" class="xWeekBarItemBox" v-for="(itemData,wrapIndex) in _weeksAr" :key="wrapIndex" >
 					<view class="xWeekBarItem" v-for="(item,index) in itemData" :key="index" @tap="dateClick(item)"
 						:style="{backgroundColor:(_isCurrent(item.xdate)&&_mode=='rect'&&isDateSelected?_activeBgColor:'transparent'),borderRadius:_rectRound}">
-						<view class="xWeekBarItemTop" :style="{height:_topHeight}">
+						<view class="xWeekBarItemTop" :style="{height:_topHeight,opacity:item.disabled?'0.35':'1'}">
 							<x-text style="font-weight: bold;"
 								:color="_isCurrent(item.xdate)&&_mode!='circular'&&isDateSelected?_activeFontColor:_fotColor"
 								:dark-color="_isCurrent(item.xdate)&&_mode!='circular'&&isDateSelected?_activeFontColor:_fotColor"
@@ -397,6 +448,7 @@
 						</view>
 						<view class="xWeekBarItemBottomWrap">
 							<view class="xWeekBarItemBottomWrapSelectedBox" :style="{
+								opacity:item.disabled?'0.35':'1',
 								height:_bottomHeight,
 								width:_bottomHeight,
 								borderRadius:_bottomHeight,

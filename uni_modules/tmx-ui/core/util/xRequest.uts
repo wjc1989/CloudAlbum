@@ -480,7 +480,7 @@ export class xRequest {
 		}
 
 		const url = _thisOpts.hostUrl + _thisOpts.url;
-		
+
 		if (url == "" || _thisOpts.hostUrl == "") {
 			this.status = 'error';
 			this._setDevReqStatus(requestId);
@@ -497,7 +497,7 @@ export class xRequest {
 			return Promise.reject(_this.result)
 		}
 
-		console.log("request-url:",url)
+
 		if (xRequestCall.authPass == false) {
 			this.status = 'auth'
 			console.warn("授权失败，中断请求")
@@ -662,7 +662,6 @@ export class xRequest {
 							if (_thisOpts.showErrorToast) {
 								uni.showToast({ title: i18n.t("tmui4x.xRequest.error") + er.errCode.toString(), mask: true, icon: 'error', complete() { rej(_this.result) } })
 							} else {
-								console.log("rej:",er.errCode)
 								rej(_this.result)
 							}
 						})

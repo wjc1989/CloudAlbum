@@ -12,20 +12,24 @@
 			}
 		},
 		methods: {
-			
+			getNodeinfo(){
+				let t  = this;
+				uni.createSelectorQuery()
+				.in(t)
+				.select('.xTabsItemChildren')
+				.boundingClientRect((rect:any)=>{
+					t.$emit('change',rect as NodeInfo,t.id)
+				}).exec()
+			}
 		},
 		mounted() {
-			let t  = this;
-			uni.createSelectorQuery()
-			.in(t)
-			.select('.xTabsItemChildren')
-			.boundingClientRect((rect:any)=>{
-				t.$emit('change',rect as NodeInfo,t.id)
-			}).exec()
+			this.getNodeinfo()
 		},
+
 		beforeUnmount() {
 			this.$emit('destory',this.id)
-		}
+		},
+		
 	}
 </script>
 <template>

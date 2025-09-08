@@ -184,18 +184,19 @@
 			}
 
 		}
+		if (props.thousand) {
+			let regx = new RegExp(`(\\d)(?=(\\d{${props.thousandLen}})+(?!\\d))`, 'g');
+			integerPart = integerPart.replace(regx, `$1${props.thousandUnit}`)
+		}
 		// 如果 digits 为 0，则返回整数部分
-		if (digits === 0) {
+		if (digits == 0) {
 			return {
 				val: integerPart,
 				zs: integerPart,
 				xs: ''
 			} as valuType;
 		}
-		if (props.thousand) {
-			let regx = new RegExp(`(\\d)(?=(\\d{${props.thousandLen}})+(?!\\d))`, 'g');
-			integerPart = integerPart.replace(regx, `$1${props.thousandUnit}`)
-		}
+		
 		return {
 			val: integerPart,
 			zs: zs,

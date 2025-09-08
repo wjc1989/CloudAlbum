@@ -108,10 +108,16 @@
 			 * circular ：小圆点
 			 * line ：线条
 			 * rectSmall ：小方格
+			 * xing ：星形
+			 * vertical ：竖圆形
 			 */
 			mode:{
 				type: String,
 				default: "rect"
+			},
+			pdRounded:{
+				type:Boolean,
+				default:false
 			}
 		},
 		computed: {
@@ -166,6 +172,9 @@
 		watch: {
 			text(newValue : string) {
 				if (newValue == "") return;
+				this.drawer();
+			},
+			mode() {
 				this.drawer();
 			},
 			logo() {
@@ -245,7 +254,8 @@
 							logoBgColor:_this._logoBgColor,
 							ecc:"H",
 							mode:_this.mode,
-							pdColor:_this._posColor
+							pdColor:_this._posColor,
+							pdRounded:_this.pdRounded,
 						} as XQrcoderProps,img)
 					},
 					fail(){
@@ -273,7 +283,8 @@
 					logoSize:this._logoSize,
 					ecc:"H",
 					mode:this.mode,
-					pdColor:_this._posColor
+					pdColor:_this._posColor,
+					pdRounded:_this.pdRounded
 				} as XQrcoderProps)
 				// #endif
 				

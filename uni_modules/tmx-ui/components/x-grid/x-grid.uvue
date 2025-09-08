@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" setup>
 	import { type PropType } from "vue"
 	import { getUid } from "../../core/util/xCoreUtil.uts"
 	import { getDefaultColor } from "../../core/util/xCoreColorUtil.uts"
@@ -16,12 +16,8 @@
 		| --- | --- | --- | --- | --- | --- | --- |
 		| ☑ | ☑️ | ☑️ | x | ☑️ | 4.14+ | 1.0.0 |
 	 */
-	export default {
-		data() {
-			return {
-			}
-		},
-		props: {
+	defineOptions({name:"xGrid"})
+	const props = defineProps({
 			/**
 			 * 显示几列
 			 */
@@ -106,52 +102,84 @@
 				type: String,
 				default: '25'
 			},
-		},
-		computed: {
-			_col() : number {
-				return this.col
+			/**
+			 * 是否显示边框。请务必为每个项目配置order
+			 */
+			showBorder:{
+				type:Boolean,
+				default:true
 			},
-			_itemHeight() : string {
-				return checkIsCssUnit(this.itemHeight, xConfig.unit)
+			borderColor:{
+				type:String,
+				default:'#f5f5f5'
 			},
-			_width() : string {
-				return checkIsCssUnit(this.width, xConfig.unit)
+			borderDarkColor:{
+				type:String,
+				default:'#333333'
 			},
-			_itemBgColor() : string {
-
-				return getDefaultColor(this.itemBgColor)
+			/**
+			 * 圆角
+			 */
+			round: {
+				type: String,
+				default: '0'
 			},
-			_bgColor() : string {
-				if (xConfig.dark == 'dark') {
-					if (this.darkBgColor != "") return getDefaultColor(this.darkBgColor)
-					return getDefaultColor(xConfig.sheetDarkColor)
-				}
-				return getDefaultColor(this.bgColor)
-			},
-			_itemGloablStyle() : XGRID_ITEM_INFO {
-				return {
-					iconColor: getDefaultColor(this.iconColor),
-					iconSize: checkIsCssUnit(this.iconSize, xConfig.unit),
-					fontColor: getDefaultColor(this.textColor),
-					fontDarkColor: getDefaultColor(this.textDarkColor),
-					fontSize: checkIsCssUnit(this.fontSize, xConfig.unit),
-					darkIconColor: getDefaultColor(this.darkIconColor),
-					
-				} as XGRID_ITEM_INFO
-			},
-		},
-		provide() {
-			return {
-				xGridRows: this._col,
-				xGridHeight: this._itemHeight,
-				xGridItemBgColor: this._itemBgColor,
-				xGridItemGlobalProptype: this._itemGloablStyle
-			}
+		})
+	
+	const _col = computed(() : number => {
+		return props.col
+	})
+	const _itemHeight = computed(() : string => {
+		return checkIsCssUnit(props.itemHeight, xConfig.unit)
+	})
+	const _width = computed(() : string => {
+		return checkIsCssUnit(props.width, xConfig.unit)
+	})
+	const _itemBgColor = computed(() : string => {
+		return getDefaultColor(props.itemBgColor)
+	})
+	const _bgColor = computed(() : string => {
+		if (xConfig.dark == 'dark') {
+			if (props.darkBgColor != "") return getDefaultColor(props.darkBgColor)
+			return getDefaultColor(xConfig.sheetDarkColor)
 		}
-	}
+		return getDefaultColor(props.bgColor)
+	})
+	const _itemGloablStyle = computed(() : XGRID_ITEM_INFO =>{
+		return {
+			iconColor: getDefaultColor(props.iconColor),
+			iconSize: checkIsCssUnit(props.iconSize, xConfig.unit),
+			fontColor: getDefaultColor(props.textColor),
+			fontDarkColor: getDefaultColor(props.textDarkColor),
+			fontSize: checkIsCssUnit(props.fontSize, xConfig.unit),
+			darkIconColor: getDefaultColor(props.darkIconColor),
+			
+		} as XGRID_ITEM_INFO
+	})
+	const _round = computed(():string => checkIsCssUnit(props.round,xConfig.unit))
+	provide("xGridCol",_col)
+	provide("xGridHeight",_itemHeight)
+	provide("xGridItemBgColor",_itemBgColor)
+	provide("xGridItemGlobalProptype",_itemGloablStyle)
+	const _borderColor = computed(():string => {
+		if (xConfig.dark == 'dark') {
+			if (props.borderDarkColor != "") return getDefaultColor(props.borderDarkColor)
+			return getDefaultColor(xConfig.inputDarkColor)
+		}
+		return getDefaultColor(props.borderColor)
+	})
+	const _showBorder = computed(():boolean => props.showBorder)
+	provide("showBorder",_showBorder)
+	provide("borderColor",_borderColor)
+
 </script>
 <template>
-	<view class="xGrid" :style="{width:_width,backgroundColor:_bgColor}">
+	<view class="xGrid" :style="{
+		width:_width,
+		backgroundColor:_bgColor,
+		border:`${_showBorder?('1px solid '+_borderColor):'none'}`,
+		borderRadius:_round
+	}">
 		<!-- 
 		 @slot 插槽内只可放置x-grid-item
 		 -->

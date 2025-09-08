@@ -452,7 +452,6 @@
 					 @prop {Boolean} opened - 当前菜单收缩或者展开状态
 					 -->
 					<slot name="toggle" :opened="opened">
-						
 						<x-icon
 						:color="opened? _activeTextColor : _textColor"
 						:name="!opened?'indent-increase':'indent-decrease'" :font-size="_fontSize"></x-icon>
@@ -461,21 +460,22 @@
 					</slot>
 				</view>
 			</list-item>
+		
 			<list-item @click="sliderItemClick(item,index)"  :style="{height:_itemHeight}" v-for="(item,index) in _list" :key="index">
 				<!--
 				 @slot 左边动态菜单插槽项目
 				 @prop {Object} item - 项目数据SLIDER_TREE_ITEM
 				 -->
 				<slot name="menu" :item="item">
+					
 					<view
 						class="selectedsIds" 
 						:class="[item.icon==''||!opened?'selectedsIdsNoIcon':'']"
 						:style="
 						[
 							{
-							backgroundColor:selectedsIds == item.id?_sliderContentBgColor:'transparent',
+							backgroundColor:selectedsIds == item.id?_sliderContentBgColor:_sliderBgColor,
 							opacity:item.disabled?'0.5':1,
-							
 							},
 							selectedsIds == item.id ? _itemSelectedStyle :{}
 						]

@@ -495,7 +495,7 @@
 		left: 0px;
 		position: fixed;
 		/* #ifndef APP-HARMONY */
-		box-shadow: 0 5px 24px rgba(0, 0, 0, 0.06);
+		/* box-shadow: 0 5px 24px rgba(0, 0, 0, 0.06); */
 		/* #endif */
 		/* #ifdef WEB */
 		cursor: grab;

@@ -762,7 +762,7 @@
 		<view :class="['xButton',_loading?'load':'']" >
 			<x-icon v-if="_icon!=''&&!_loading" :style="{marginRight:_iconBtn?'0px':' 3px'}" :font-size="_iconSize"
 				:color="_set_font_color" :name="_icon"></x-icon>
-			<x-icon v-if="_loading" color="white" :spin="true" name="loader-fill"></x-icon>
+			<x-icon v-if="_loading" :color="_set_font_color" :spin="true" name="loader-fill"></x-icon>
 			
 			
 			<!-- #ifdef MP -->

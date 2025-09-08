@@ -75,7 +75,7 @@
 		},
 		computed: {
 			_label() : string {
-				if(this.label == '') return this!.i18n.t("tmui4x.xloading.label");
+				if(this.label == '') return xConfig.i18n.t("tmui4x.xloading.label");
 				return this.label;
 			},
 			_icon() : string {

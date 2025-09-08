@@ -1,3 +1,28 @@
+## 1.1.17（2025-09-03）
+* 【声明】本次更新中在1.1.16版本中提到的鸿蒙Next相关插件和组件，在本次版本中并未更新兼容。请关注后续版本。
+* [适配] 本次版本适配了xSqliteS数据库插件，从1.1.17版本开始可以用于鸿蒙原生应用了。
+* [优化] xDrawer动画放弃了官方的动画结束@transitionend事件，改用setTimeout，官方 的这个接口在不同机型和设备上有不同的差异，慎用。
+* x-darg-item 写错了一个语法。会在鸿蒙编译的时候无法编译通过。并在插槽上添加数据：order，用于需要显示自身索引位置的场景。
+* 优化demo页面展示，同步组件的使用方式。
+* [优化] x-form新增支持嵌套字段校验如{a:{b:""}},需要form-item上属性filed="a/b",关于'.'连接符安卓sdk会在4.86+上支持
+* [优化] x-tabbar,增加事件doubleClick。[issue](https://git.tmui.design//tmui/tmui4xIssue/issues/11)
+* [修复] x-button，loading图标没有跟随字体颜色。[issue](https://git.tmui.design//tmui/tmui4xIssue/issues/7)
+* [修复] x-tabs,中激活动态字体大小与普通字体大小不一致时导致的定位偏移。见[issue](https://git.tmui.design//tmui/tmui4xIssue/issues/3)
+* [修复] x-slider-menu暗黑切换项目背景在ios端有兼容性。见[issue](https://git.tmui.design/tmui/tmui4xIssue/issues/12)
+* [修复] x-drawer多语言设置时变量出错了。见[issue](https://git.tmui.design/tmui/tmui4xIssue/issues/16)
+* [优化] xDate新增函数getBetweenDate，用于取start,end之间的比较，如果在范围内返回本身，如果在范围外取start或者end,返回的值始终在起始之间。
+* [修复] xBetweenTime ,限制start,end后，如果点快捷选择时会超出限制的时间区间。[issue](https://git.tmui.design/tmui/tmui4xIssue/issues/18)
+* [修复] xWeekbar在提供了start和end后未限制日期[issue](https://git.tmui.design/tmui/tmui4xIssue/issues/20)
+* [增强] xWeekbar新增属性seekDay，可以控制一周的第一天是任意一周的某一天（0-6）
+* [修复+优化] 修复xIndexbar索引组件，使用flex:1时无法自动填充父容器（导致无法全屏或者局部），为组件增了属性：customSliderBar用于自定右侧菜单，新增插槽：top用于自定义顶部自由布局，当右边滑动时会自定定位到top插槽位置类似微信通讯录。
+同时重新编写了demo索引页面，仿微信通讯录示例。
+* [修复] x-money,值为0时的千分位问题[issue](https://git.tmui.design/tmui/tmui4xIssue/issues/21)
+* [优化] xGrid组件新增round，showBorder等相关属性，以显示边线和圆角相关，子组件相应增加order,同时两组件重写为setup组合模式了。demo示例页面增加了更多的示例
+* [增强] 相关日历组件增加了属性seekDay用于设定月面板中周的第一天是0-6（周一至周日）中的哪天为开始。比如设定6，表示以周日为起始第一天排序。
+* [增强] 二维码，新增了一个属性pdRounded，用于控制是否让三个定位变成个性化圆形，同时mode增加了可选模式：vertical竖形胶囊和星星,看起来可爱一点。
+* [增强] 日历组件增加了dateStatus设定日期状态指示，并更新了示例页面为组合式代码。
+* [修复] betweentTime组件因多语言设置忽略了用户的format格式的输入导致输入框没有按用户的格式显示。[issue](https://git.tmui.design/tmui/tmui4xIssue/issues/23)
+* [优化文档] 对技术文档重新梳理，并启用了新文档页面。
 ## 1.1.16（2025-8-17）
 * 已有项目请谨慎更新！！！，因兼容鸿蒙部分组件可能更改了结构。
 * 【重要】请务必使用4.75sdk+，本次更新鸿蒙兼容，并不代表完全兼容，以下有部分组件还要继续完善，还有一些插件未提及可能也无法使用，但大部分是可以使用的。其它问题在后续中继续完善。

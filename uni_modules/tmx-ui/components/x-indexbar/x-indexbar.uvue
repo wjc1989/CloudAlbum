@@ -37,6 +37,8 @@
 				viewConunt: 0,
 				windowTop: 0,
 				scrollTop: 0,
+				realScrollY:0,
+				headerDomRectHeight:0,
 				_y: 0,
 				tid: 0,
 				isMoveing: false,
@@ -117,9 +119,16 @@
 			titleHeight: {
 				type: String,
 				default: '32'
+			},
+			customSliderBar:{
+				type:Array as PropType<Array<string>>,
+				default:():string[] => [] as string[]
 			}
 		},
 		computed: {
+			_customBarLen():number{
+				return this.customSliderBar.length;
+			},
 			_height() : string {
 				return checkIsCssUnit(this.height, xConfig.unit)
 			},
@@ -183,6 +192,18 @@
 			},
 			_list() : UTSJSONObject[] {
 				return this.list;
+			},
+			_listTotal() : UTSJSONObject[] {
+				
+					let customlist = this.customSliderBar.map((el:string,index:number):UTSJSONObject => {
+						return {
+							"id": index,
+							"name": el,
+							"logo": "",
+							"index": el
+						} as UTSJSONObject
+					})
+				return [...customlist,...this.list];
 			}
 
 		},
@@ -224,6 +245,15 @@
 				
 			},
 			// #endif
+			getHeaderDom(){
+				let t = this;
+				const ele = this.$refs['headerRef']! as UniElement;
+				ele.getBoundingClientRectAsync()
+				?.then((rect:DOMRect)=>{
+					t.headerDomRectHeight = rect.height
+				})
+				.catch(()=>{})
+			},
 			setInitData() {
 				let lst = Date.now()
 				let list = this._list as UTSJSONObject[]
@@ -235,26 +265,39 @@
 					let keya = current.getString("index")!;
 					if (!listbarTitle.includes(keya!)) {
 						listbarTitle.push(keya)
-						listbar.push({ index: i, title: keya } as indexbarTYPE)
+						listbar.push({ index: i+this._customBarLen, title: keya } as indexbarTYPE)
 					}
 				}
-				this.listIndexBar = listbar;
+				
+				let customlist = this.customSliderBar.map((el:string,index:number):indexbarTYPE => {
+					return {
+						index,
+						title:el
+					} as indexbarTYPE
+				})
+				this.listIndexBar = [...customlist,...listbar];
 
 				console.warn("索引数据处理时间(毫秒)：", Date.now() - lst, "如果此值过大，表示sdk有问题,正常在10ms内，安卓dev会在60ms内")
 
 			},
 			sliderOnclik(evt : UniPointerEvent, item : indexbarTYPE, index : number) {
+				
+				// let customIndex = this.customSliderBar.length + index -1;
 				this.nowIndex = this.listIndexBar[index].index;
-				this.scrollTop = this._cellHeight * this.nowIndex
+				// this.nowIndex = index;
+				if(index <=this.customSliderBar.length-1){
+					this.scrollTop = 0
+				}else{
+					this.scrollTop = this._cellHeight * this.nowIndex + this.headerDomRectHeight
+				}
 				this.currentIndexBYbar = index;
-
 				this.transxyByDotTop(evt.clientY)
-
-
 			},
 			onScrollEvent(evt : UniScrollEvent) {
 				if (this.isMoveing) return;
-				this.transxyend(evt.detail.scrollTop - this._titleHeight)
+				this.realScrollY = evt.detail.scrollTop ;
+				this.transxyend(evt.detail.scrollTop - this._titleHeight  - this.headerDomRectHeight)
+				this.getHeaderDom()
 			},
 			ONscrollend(evt : UniScrollEvent) {
 				// #ifdef APP-IOS||APP-ANDROID
@@ -292,6 +335,7 @@
 						t.boxHeight = nodeinfo.height!;
 						t.boxLeft = nodeinfo.left!;
 					})
+				this.getHeaderDom();
 			},
 
 			hideDot() {
@@ -336,9 +380,13 @@
 				t.transxyByDotTop(y)
 				// 减少处理次数
 				this.tid = setTimeout(function () {
-					t.scrollTop = index * t._cellHeight
+					if(index<=t._customBarLen-1){
+						t.scrollTop = 0
+					}else{
+						t.scrollTop = index * t._cellHeight + t.headerDomRectHeight
+					}
 					t.isShowOldViewData = false;
-
+					t.realScrollY = t.scrollTop ;
 				}, 10);
 
 			},
@@ -397,24 +445,34 @@
 </script>
 <template>
 
-	<view>
-		<view :style="{height:_titleHeight+'px'}">
+	<view class="xIndexBar" :style="{height:_height,width:_width}">
+		<view :style="{height:_titleHeight+'px',top:realScrollY>=headerDomRectHeight?'0px':(headerDomRectHeight-realScrollY)+'px'}">
+			
 			<!-- 
 			 @slot 悬浮的菜单头
 			 @props {title} 当前选中的菜单头
 			 @props {index} 当前选中的菜单头索引
 			 -->
 			<slot name="header" :title="listIndexBar.length>0?listIndexBar[currentIndexBYbar].title:''"
-				:index="listIndexBar.length>0?listIndexBar[currentIndexBYbar].index:0">
+				:index="listIndexBar.length>0?listIndexBar[currentIndexBYbar+(Math.max(customSliderBar.length-1,0))].index:0">
 				<view style="display: flex;flex-direction: row;align-items: center;height: 100%;">
-					<x-text v-if="listIndexBar.length>0">{{listIndexBar[currentIndexBYbar].title}}</x-text>
+					<x-text v-if="listIndexBar.length>0">{{listIndexBar[currentIndexBYbar<= (_customBarLen-1)?_customBarLen:currentIndexBYbar].title}}</x-text>
 				</view>
 			</slot>
 		</view>
-		<view  class="xIndexBarBox" :style="{height:_height,width:_width}">
+		<view  class="xIndexBarBox" >
 			<scroll-view @scrollend="ONscrollend" :show-scrollbar="false" @scroll="onScrollEvent" :scroll-top="scrollTop"
 				:bounces="false" :enable-back-to-top="true" class="xIndexBar" :style="{height:boxHeight+'px'}">
-			
+				
+				<view ref="headerRef">
+					<view style="flex:1">
+						<!-- 
+						 @slot 顶部布局，可以自由布局
+						 -->
+						<slot name="top"></slot>
+					</view>
+					<view :style="{height:_titleHeight+'px'}"></view>
+				</view>
 				<view :style="{height:_totalHeight+'px',position:'relative'}" v-if="_viewList.length>0">
 			
 					<template v-for="(item,index) in _viewList" :key="index">
@@ -444,16 +502,13 @@
 						:hover-stay-time="100" hover-class="xIndexBarRightSliderItemHover" :style="{
 						backgroundColor:currentIndexBYbar==index?_dotActiveColor:_dotBgColor,
 					}">
-						<text :style="{color:currentIndexBYbar==index?'white':_dotColor}"
-							class="xIndexBarRightSliderItemText">{{item.title}}</text>
+						<text :style="{color:currentIndexBYbar==index?'white':_dotColor}" class="xIndexBarRightSliderItemText">{{item.title}}</text>
 					</view>
-			
 				</view>
 			</view>
-			<!-- top:dotParentOffsetTop+'px', -->
 			<view android-layer-type="software" ref="xIndexBarDot" class="xIndexBarDot"
 				:style="{opacity:!showDot?'0':'1',backgroundColor:_dotActiveColor}">
-				<text v-if="(_list.length>0)" class="xIndexBarDotText">{{_list[nowIndex]['index']}}</text>
+				<text v-if="(_list.length>0)" class="xIndexBarDotText">{{_listTotal[nowIndex]['index']}}</text>
 			</view>
 			
 		</view>
@@ -461,8 +516,14 @@
 
 </template>
 <style scoped>
+	.xIndexBar{
+		display: flex;
+		flex-direction: column;
+	}
 	.xIndexBarBox {
 		position: relative;
+		flex: 1;
+		width:100%;
 	}
 
 	.xIndexBarBoxItem {

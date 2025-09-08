@@ -41,12 +41,18 @@ export type XQrcoderProps = {
 	 * 绘制的样式目前提供
 	 * rect ：普通码矩形
 	 * circular ：小圆点
-	 * line ：线条
+	 * line ：横向线条
 	 * rectSmall ：小方格
+	 * xing ：星形
+	 * vertical ：竖向线条带圆角
 	 */
 	mode:String,
 	/**
 	 * 定位点的颜色
 	 */
-	pdColor?: string
+	pdColor?: string,
+	/**
+	 * 定位点是否使用圆角
+	 */
+	pdRounded?: boolean
 }
