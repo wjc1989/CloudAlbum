@@ -14,8 +14,8 @@ android {
         applicationId = "com.esct.album"
         minSdk = 24
         targetSdk = 36
-        versionCode = 20251020
-        versionName = "20251020.1"
+        versionCode = 20261020
+        versionName = "20261020.1"
     }
 
     // 正式签名配置读取 android/keystore.properties（不提交到 git）
