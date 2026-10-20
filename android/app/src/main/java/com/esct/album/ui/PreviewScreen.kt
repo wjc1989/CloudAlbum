@@ -1,4 +1,4 @@
-package com.cloudalbum.wallpaper.ui
+package com.esct.album.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
-import com.cloudalbum.wallpaper.R
-import com.cloudalbum.wallpaper.data.ImageInfo
+import com.esct.album.R
+import com.esct.album.data.ImageInfo
 
 /** 全屏预览，左右滑动切换，长按弹出操作菜单（对应 uni.previewImage + longPressActions） */
 @OptIn(ExperimentalMaterial3Api::class)

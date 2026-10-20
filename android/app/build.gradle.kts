@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -5,15 +7,29 @@ plugins {
 }
 
 android {
-    namespace = "com.cloudalbum.wallpaper"
+    namespace = "com.esct.album"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.cloudalbum.wallpaper"
+        applicationId = "com.esct.album"
         minSdk = 24
         targetSdk = 36
         versionCode = 20251020
         versionName = "20251020.1"
+    }
+
+    // 正式签名配置读取 android/keystore.properties（不提交到 git）
+    val keystoreFile = rootProject.file("keystore.properties")
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            val props = Properties().apply { keystoreFile.inputStream().use { load(it) } }
+            create("release") {
+                storeFile = file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -21,8 +37,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // 没有正式签名时先用 debug 签名，方便直接安装
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 

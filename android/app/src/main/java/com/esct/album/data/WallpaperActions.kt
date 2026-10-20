@@ -1,4 +1,4 @@
-package com.cloudalbum.wallpaper.data
+package com.esct.album.data
 
 import android.app.WallpaperManager
 import android.content.ContentValues

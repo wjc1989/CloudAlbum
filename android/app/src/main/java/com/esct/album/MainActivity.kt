@@ -1,4 +1,4 @@
-package com.cloudalbum.wallpaper
+package com.esct.album
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -40,11 +40,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
-import com.cloudalbum.wallpaper.ui.CloudAlbumTheme
-import com.cloudalbum.wallpaper.ui.GalleryScreen
-import com.cloudalbum.wallpaper.ui.GalleryViewModel
-import com.cloudalbum.wallpaper.ui.PreviewScreen
-import com.cloudalbum.wallpaper.ui.UiEvent
+import com.esct.album.ui.CloudAlbumTheme
+import com.esct.album.ui.GalleryScreen
+import com.esct.album.ui.GalleryViewModel
+import com.esct.album.ui.PreviewScreen
+import com.esct.album.ui.UiEvent
 
 class MainActivity : ComponentActivity() {
 

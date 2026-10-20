@@ -1,4 +1,4 @@
-package com.cloudalbum.wallpaper.ui
+package com.esct.album.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,7 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.cloudalbum.wallpaper.R
+import com.esct.album.R
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 

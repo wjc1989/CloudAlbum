@@ -1,4 +1,4 @@
-package com.cloudalbum.wallpaper.ui
+package com.esct.album.ui
 
 import android.app.Application
 import androidx.compose.runtime.getValue
@@ -7,11 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.cloudalbum.wallpaper.R
-import com.cloudalbum.wallpaper.data.ApiException
-import com.cloudalbum.wallpaper.data.ImageApi
-import com.cloudalbum.wallpaper.data.ImageInfo
-import com.cloudalbum.wallpaper.data.WallpaperActions
+import com.esct.album.R
+import com.esct.album.data.ApiException
+import com.esct.album.data.ImageApi
+import com.esct.album.data.ImageInfo
+import com.esct.album.data.WallpaperActions
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
