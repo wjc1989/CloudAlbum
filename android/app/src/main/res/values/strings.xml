@@ -5,7 +5,6 @@
     <string name="set_home_screen">Set as Home Screen</string>
     <string name="set_lock_screen">Set as Lock Screen</string>
     <string name="set_home_and_lock_screen">Set as Home &amp; Lock Screen</string>
-    <string name="set_aod">Set as Always-On Display</string>
     <string name="save_to_album">Save to Album</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>

@@ -56,7 +56,6 @@ fun PreviewScreen(
     onDismiss: () -> Unit,
     onSetWallpaper: (Int, WallpaperActions.Target) -> Unit,
     onSaveToAlbum: (Int) -> Unit,
-    onSetAod: ((Int) -> Unit)? = null,
 ) {
     val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
     var menuIndex by remember { mutableStateOf<Int?>(null) }
@@ -97,13 +96,6 @@ fun PreviewScreen(
                 SheetItem(stringResource(R.string.set_home_and_lock_screen)) {
                     menuIndex = null
                     onSetWallpaper(index, WallpaperActions.Target.BOTH)
-                }
-                onSetAod?.let { setAod ->
-                    HorizontalDivider()
-                    SheetItem(stringResource(R.string.set_aod)) {
-                        menuIndex = null
-                        setAod(index)
-                    }
                 }
                 HorizontalDivider()
                 SheetItem(stringResource(R.string.save_to_album)) {

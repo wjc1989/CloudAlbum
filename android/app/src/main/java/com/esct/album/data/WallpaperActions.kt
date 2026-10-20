@@ -64,16 +64,12 @@ object WallpaperActions {
 
     // 华为锁屏显示的是主题锁屏图，不读取 FLAG_LOCK 壁纸，需要交给系统组件设置
     private val HUAWEI_WALLPAPER = ComponentName("com.huawei.photos", "com.android.gallery3d.app.Wallpaper")
-    private val HUAWEI_AOD = ComponentName("com.huawei.aod", "com.huawei.aod.PreviewPersonalityPictureActivityAlias")
 
     private fun attachIntent(context: Context, component: ComponentName): Intent? {
         val intent = Intent(Intent.ACTION_ATTACH_DATA).setComponent(component)
             .setType("image/*")
         return intent.takeIf { context.packageManager.resolveActivity(it, 0) != null }
     }
-
-    /** 当前设备是否支持设置华为息屏显示图片 */
-    fun supportsAod(context: Context) = attachIntent(context, HUAWEI_AOD) != null
 
     /** 复制到可分享目录，返回带读取授权的 ATTACH_DATA intent */
     private fun shareTo(context: Context, file: File, component: ComponentName): Intent? {
@@ -86,16 +82,6 @@ object WallpaperActions {
         return intent.setDataAndType(uri, "image/*")
             .putExtra("mimeType", "image/*")
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-
-    /** 设置华为息屏显示图片，返回需要启动的系统页面 */
-    suspend fun setAod(context: Context, url: String): Intent = withContext(Dispatchers.IO) {
-        val file = download(context, url)
-        try {
-            shareTo(context, file, HUAWEI_AOD) ?: throw IOException("Always-on display not supported")
-        } finally {
-            file.delete()
-        }
     }
 
     /**

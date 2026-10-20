@@ -8,10 +8,9 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
-    <!-- 华为锁屏 / 息屏显示需交给系统组件设置 -->
+    <!-- 华为锁屏需交给系统图库设置 -->
     <queries>
         <package android:name="com.huawei.photos" />
-        <package android:name="com.huawei.aod" />
     </queries>
 
     <application

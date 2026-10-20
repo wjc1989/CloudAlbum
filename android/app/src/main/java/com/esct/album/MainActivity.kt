@@ -116,7 +116,6 @@ private fun App(vm: GalleryViewModel, onExit: () -> Unit) {
                 onDismiss = { previewIndex = null },
                 onSetWallpaper = vm::setWallpaper,
                 onSaveToAlbum = saveToAlbum,
-                onSetAod = if (vm.supportsAod) vm::setAod else null,
             )
         } else {
             DoubleBackToExit(onExit)

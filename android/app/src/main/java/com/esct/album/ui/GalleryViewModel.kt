@@ -100,12 +100,6 @@ class GalleryViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    val supportsAod = WallpaperActions.supportsAod(app)
-
-    fun setAod(index: Int) = runAction(index, R.string.setting, 0) { url ->
-        WallpaperActions.setAod(getApplication(), url)
-    }
-
     fun saveToAlbum(index: Int) = runAction(index, R.string.saving, R.string.saved_to_photos) { url ->
         WallpaperActions.saveToAlbum(getApplication(), url)
     }
