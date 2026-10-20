@@ -1,6 +1,7 @@
 package com.esct.album.ui
 
 import android.app.Application
+import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,7 @@ import kotlin.math.ceil
 sealed interface UiEvent {
     data class Toast(val text: String) : UiEvent
     data class Dialog(val title: String, val content: String) : UiEvent
+    data class Launch(val intent: Intent) : UiEvent
 }
 
 class GalleryViewModel(app: Application) : AndroidViewModel(app) {
@@ -87,22 +89,40 @@ class GalleryViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun setLockScreen(index: Int) = runAction(index, R.string.setting, R.string.lock_screen_set) { url ->
-        WallpaperActions.setLockScreen(getApplication(), url)
+    fun setWallpaper(index: Int, target: WallpaperActions.Target) {
+        val successRes = when (target) {
+            WallpaperActions.Target.HOME -> R.string.home_screen_set
+            WallpaperActions.Target.LOCK -> R.string.lock_screen_set
+            WallpaperActions.Target.BOTH -> R.string.home_and_lock_screen_set
+        }
+        runAction(index, R.string.setting, successRes) { url ->
+            WallpaperActions.setWallpaper(getApplication(), url, target)
+        }
+    }
+
+    val supportsAod = WallpaperActions.supportsAod(app)
+
+    fun setAod(index: Int) = runAction(index, R.string.setting, 0) { url ->
+        WallpaperActions.setAod(getApplication(), url)
     }
 
     fun saveToAlbum(index: Int) = runAction(index, R.string.saving, R.string.saved_to_photos) { url ->
         WallpaperActions.saveToAlbum(getApplication(), url)
     }
 
-    private fun runAction(index: Int, busyRes: Int, successRes: Int, block: suspend (String) -> Unit) {
+    /** block 返回 Intent 时交给系统页面继续设置，否则提示 successRes */
+    private fun runAction(index: Int, busyRes: Int, successRes: Int, block: suspend (String) -> Any?) {
         val item = list.getOrNull(index) ?: return
         if (busyText != null) return
         busyText = str(busyRes)
         viewModelScope.launch {
             try {
-                block(item.url)
-                _events.send(UiEvent.Toast(str(successRes)))
+                val next = block(item.url)
+                if (next is Intent) {
+                    _events.send(UiEvent.Launch(next))
+                } else {
+                    _events.send(UiEvent.Toast(str(successRes)))
+                }
             } catch (e: Exception) {
                 _events.send(UiEvent.Dialog(str(R.string.failed), e.message ?: e.toString()))
             } finally {

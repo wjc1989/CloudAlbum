@@ -1,6 +1,7 @@
 package com.esct.album
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -72,6 +73,11 @@ private fun App(vm: GalleryViewModel, onExit: () -> Unit) {
             when (event) {
                 is UiEvent.Toast -> Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
                 is UiEvent.Dialog -> dialog = event
+                is UiEvent.Launch -> try {
+                    context.startActivity(event.intent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -108,8 +114,9 @@ private fun App(vm: GalleryViewModel, onExit: () -> Unit) {
                 images = vm.list,
                 initialIndex = index,
                 onDismiss = { previewIndex = null },
-                onSetLockScreen = vm::setLockScreen,
+                onSetWallpaper = vm::setWallpaper,
                 onSaveToAlbum = saveToAlbum,
+                onSetAod = if (vm.supportsAod) vm::setAod else null,
             )
         } else {
             DoubleBackToExit(onExit)

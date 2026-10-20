@@ -45,6 +45,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import com.esct.album.R
 import com.esct.album.data.ImageInfo
+import com.esct.album.data.WallpaperActions
 
 /** 全屏预览，左右滑动切换，长按弹出操作菜单（对应 uni.previewImage + longPressActions） */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,8 +54,9 @@ fun PreviewScreen(
     images: List<ImageInfo>,
     initialIndex: Int,
     onDismiss: () -> Unit,
-    onSetLockScreen: (Int) -> Unit,
+    onSetWallpaper: (Int, WallpaperActions.Target) -> Unit,
     onSaveToAlbum: (Int) -> Unit,
+    onSetAod: ((Int) -> Unit)? = null,
 ) {
     val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
     var menuIndex by remember { mutableStateOf<Int?>(null) }
@@ -82,9 +84,26 @@ fun PreviewScreen(
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(onDismissRequest = { menuIndex = null }, sheetState = sheetState, dragHandle = null) {
             Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
+                SheetItem(stringResource(R.string.set_home_screen)) {
+                    menuIndex = null
+                    onSetWallpaper(index, WallpaperActions.Target.HOME)
+                }
+                HorizontalDivider()
                 SheetItem(stringResource(R.string.set_lock_screen)) {
                     menuIndex = null
-                    onSetLockScreen(index)
+                    onSetWallpaper(index, WallpaperActions.Target.LOCK)
+                }
+                HorizontalDivider()
+                SheetItem(stringResource(R.string.set_home_and_lock_screen)) {
+                    menuIndex = null
+                    onSetWallpaper(index, WallpaperActions.Target.BOTH)
+                }
+                onSetAod?.let { setAod ->
+                    HorizontalDivider()
+                    SheetItem(stringResource(R.string.set_aod)) {
+                        menuIndex = null
+                        setAod(index)
+                    }
                 }
                 HorizontalDivider()
                 SheetItem(stringResource(R.string.save_to_album)) {
